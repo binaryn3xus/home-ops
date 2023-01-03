@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="notes/secret-variations-with-flux.html">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="notes/yaml-madness.html">YAML Madness</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="notes/opnsense.html">Opnsense</a></li><li class="chapter-item expanded "><a href="notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="notes/secret-variations-with-flux.html">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="notes/yaml-madness.html">YAML Madness</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -305,7 +305,245 @@ GitRepository :: home-ops-kubernetes
 <hr />
 <h2 id="-license"><a class="header" href="#-license">🔏 License</a></h2>
 <p>See <a href="./LICENSE">LICENSE</a></p>
-<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/introduction.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="pikvm"><a class="header" href="#pikvm">PiKVM</a></h1>
+<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/introduction.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="nas"><a class="header" href="#nas">NAS</a></h1>
+<p>Outside of using <a href="https://github.com/ansible/ansible">Ansible</a> for configuring the OS, there are some manual steps I did to set it up.</p>
+<h2 id="zfs"><a class="header" href="#zfs">ZFS</a></h2>
+<h3 id="mirrored-zpool"><a class="header" href="#mirrored-zpool">Mirrored Zpool</a></h3>
+<ol>
+<li>
+<p>Create initial pool and set configuration</p>
+<pre><code class="language-sh">sudo zpool create -o ashift=12 -f eros mirror \
+    /dev/disk/by-id/scsi-SATA_WDC_WD120EDGZ-11_9LHWA5KG \
+    /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_9MG0AHZA
+sudo zfs set atime=off eros
+sudo zfs set compression=lz4 eros
+</code></pre>
+</li>
+<li>
+<p>Attach more mirrors</p>
+<pre><code class="language-sh">sudo zpool add eros mirror \
+    /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0B3D2 \
+    /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_X1G3B01L
+</code></pre>
+</li>
+<li>
+<p>Add spares</p>
+<pre><code class="language-sh">sudo zpool add -f eros spare \
+    /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_QGGETR5T
+</code></pre>
+</li>
+</ol>
+<h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
+<ol>
+<li>
+<p>Create datasets</p>
+<pre><code class="language-sh">sudo zfs create eros/Apps
+sudo zfs create eros/Apps/MinIO
+sudo zfs create eros/Media
+</code></pre>
+</li>
+<li>
+<p>Share dataset over NFS</p>
+<pre><code class="language-sh">sudo zfs set \
+    sharenfs=&quot;no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24,ro=192.168.150.21,ro=192.168.150.28&quot; \
+    eros/Media
+sudo zfs set \
+    sharenfs=&quot;no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24&quot; \
+    eros/Apps/MinIO
+</code></pre>
+</li>
+<li>
+<p>Dataset Permissions</p>
+<pre><code class="language-sh">sudo chmod 770 /eros/Media
+sudo chown -R devin:users /eros/Media
+</code></pre>
+</li>
+</ol>
+<h3 id="snapshots"><a class="header" href="#snapshots">Snapshots</a></h3>
+<ol>
+<li>
+<p>Add or replace the file <code>/etc/sanoid/sanoid.conf</code></p>
+<pre><code class="language-ini">[eros/Media]
+use_template = media
+
+[template_media]
+frequently = 0
+hourly = 0
+daily = 7
+monthly = 0
+yearly = 0
+autosnap = yes
+autoprune = yes
+</code></pre>
+</li>
+<li>
+<p>Start and enable sanoid</p>
+<pre><code class="language-sh">sudo systemctl enable --now sanoid.timer
+</code></pre>
+</li>
+<li>
+<p>Give a local user access to a specific datasets snapshots</p>
+<pre><code class="language-sh">sudo zfs allow -u jeff send,snapshot,hold eros/Media
+</code></pre>
+</li>
+</ol>
+<h2 id="nfs"><a class="header" href="#nfs">NFS</a></h2>
+<h3 id="local-nfs-shares"><a class="header" href="#local-nfs-shares">Local NFS Shares</a></h3>
+<ol>
+<li>
+<p>Add or replace file <code>/etc/exports.d/local.exports</code></p>
+<pre><code class="language-text">/share/PVCs 192.168.1.0/24(sec=sys,rw,no_subtree_check,all_squash,anonuid=568,anongid=100)
+/share/PVCs 192.168.42.0/24(sec=sys,rw,no_subtree_check,all_squash,anonuid=568,anongid=100)
+</code></pre>
+</li>
+<li>
+<p>Dataset Permissions</p>
+<pre><code class="language-sh">sudo chmod 770 /share/PVCs
+sudo chown -R devin:users /share/PVCs
+</code></pre>
+</li>
+<li>
+<p>Reload exports</p>
+<pre><code class="language-sh">sudo exportfs -arv
+</code></pre>
+</li>
+</ol>
+<h2 id="misc"><a class="header" href="#misc">Misc</a></h2>
+<h3 id="badblocks"><a class="header" href="#badblocks">Badblocks</a></h3>
+<div id="admonition-warning" class="admonition warning">
+<div class="admonition-title">
+<p>Warning</p>
+<p><a class="admonition-anchor-link" href="notes/nas.html#admonition-warning"></a></p>
+</div>
+<div>
+<p>This command is <strong>very destructive</strong> and should only be used to check for bad sectors</p>
+</div>
+</div>
+<pre><code class="language-sh">sudo badblocks -b 4096 -wsv /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
+</code></pre>
+<h3 id="lenovo-sa120"><a class="header" href="#lenovo-sa120">Lenovo SA120</a></h3>
+<p>Due to the loudness of the fans, they can be adjusted by using <ins><a href="https://github.com/AndrewX192/lenovo-sa120-fanspeed-utility.git">AndrewX192/lenovo-sa120-fanspeed-utility</a></ins>.</p>
+<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/nas.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="opnsense"><a class="header" href="#opnsense">Opnsense</a></h1>
+<h2 id="bgp"><a class="header" href="#bgp">BGP</a></h2>
+<p>Instead of using Metallb for L2/L3 load balancer IPs I am using the Kubernetes Calico CNI with BGP which allows me to advertise load balancer IPs directly over BGP. This has some benefits like having equal cost multipath (ECMP) for scaled workloads in my cluster.</p>
+<ol>
+<li>Routing &gt; BPG | General
+<ol>
+<li><code>enable</code> = <code>true</code></li>
+<li><code>BGP AS Number</code> = <code>64512</code></li>
+<li><code>Network</code> = <code>192.168.42.0/24</code> (Subnet your Kubernetes nodes are on)</li>
+<li>Save</li>
+</ol>
+</li>
+<li>Routing &gt; BGP | Neighbors
+<ul>
+<li>Add a neighbor for each Kubernetes node
+<ol>
+<li><code>Enabled</code> = <code>true</code></li>
+<li><code>Peer-IP</code> = <code>192.168.42.x</code> (Kubernetes Node IP)</li>
+<li><code>Remote AS</code> = <code>64512</code></li>
+<li><code>Update-Source Interface</code> = <code>HOME_SERVER</code> (VLAN of Kubernetes nodes)</li>
+<li>Save</li>
+<li>Continue adding neighbors until all your nodes are present</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>Routing &gt; General
+<ol>
+<li><code>Enable</code> = <code>true</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>System &gt; Settings &gt; Tunables
+<ol>
+<li>Add <code>net.route.multipath</code> and set the value to <code>1</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Reboot</li>
+<li>Verify
+<ol>
+<li>Routing &gt; Diagnostics | Summary</li>
+</ol>
+</li>
+</ol>
+<div id="admonition-info" class="admonition info">
+<div class="admonition-title">
+<p>Info</p>
+<p><a class="admonition-anchor-link" href="notes/opnsense.html#admonition-info"></a></p>
+</div>
+<div>
+<p>Without updating the configuration described in step 4 the routes from a client will only take a single path to your Kubernetes workloads even if they are scaled to more than one.</p>
+</div>
+</div>
+<h2 id="haproxy"><a class="header" href="#haproxy">HAProxy</a></h2>
+<p>While kube-vip is very nice for having a API server ready to go and running in your cluster I had issues with mixing layer 2 and layer 3 between Calico in BGP and kube-vip using L2 ARP. You also cannot run Calico in BGP with kube-vip in BGP, they will fight and you will lose. Instead I choose to use Haproxy which you can install from the Opnsense Plugins.</p>
+<ol>
+<li>Services &gt; HAProxy | Real Servers
+<ul>
+<li>Add a server for each <strong>master node</strong> in your Kubernetes cluster
+<ol>
+<li><code>Enabled</code> = <code>true</code></li>
+<li><code>Name or Prefix</code> = <code>k8s-apiserver-x</code></li>
+<li><code>FQDN or IP</code> = <code>192.168.42.x</code></li>
+<li><code>Port</code> = <code>6443</code></li>
+<li><code>Verify SSL Certificate</code> = <code>false</code></li>
+<li>Save</li>
+<li>Continue adding servers until all your <strong>master nodes</strong> are present</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>Services &gt; HAProxy | Rules &amp; Checks &gt; Health Monitors
+<ol>
+<li><code>Name</code> = <code>k8s-apiserver-health</code></li>
+<li><code>SSL preferences</code> = <code>Force SSL for health checks</code></li>
+<li><code>Port to check</code> = <code>6443</code></li>
+<li><code>HTTP method</code> = <code>GET</code></li>
+<li><code>Request URI</code> = <code>/healthz</code></li>
+<li><code>HTTP version</code> = <code>HTTP/1.1</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Services &gt; HAProxy | Virtual Services &gt; Backend Pools
+<ol>
+<li><code>Enabled</code> = <code>true</code></li>
+<li><code>Name</code> = <code>k8s-apiserver-be</code></li>
+<li><code>Mode</code> = <code>TCP (Layer 4)</code></li>
+<li><code>Servers</code> = <code>k8s-apiserver-x</code> ... (Add one for each server you created. Use TAB key to complete typing each server)</li>
+<li><code>Source address</code> = <code>192.168.1.1</code> (Your Opnsense IP address)</li>
+<li><code>Enable Health Checking</code> = <code>true</code></li>
+<li><code>Health Monitor</code> = <code>k8s-apiserver-health</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Services &gt; HAProxy | Virtual Services &gt; Frontend Pools
+<ol>
+<li><code>Enabled</code> = <code>true</code></li>
+<li><code>Name</code> = <code>k8s-apiserver-fe</code></li>
+<li><code>Listen Addresses</code> = <code>192.168.1.1:6443</code> (Your Opnsense IP address. Use TAB key to complete typing a listen address)</li>
+<li><code>Type</code> = <code>TCP</code></li>
+<li><code>Default Backend Pool</code> = <code>k8s-apiserver-be</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Services &gt; HAProxy | Settings &gt; Service
+<ol>
+<li><code>Enable HAProxy</code> = <code>true</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Services &gt; HAProxy | Settings &gt; Default Parameters
+<ol>
+<li><code>Client Timeout</code> = <code>4h</code></li>
+<li><code>Connection Timeout</code> = <code>10s</code></li>
+<li><code>Server Timeout</code> = <code>4h</code></li>
+<li>Save</li>
+</ol>
+</li>
+</ol>
+<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/opnsense.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="pikvm"><a class="header" href="#pikvm">PiKVM</a></h1>
 <h2 id="update-pikvm"><a class="header" href="#update-pikvm">Update PiKVM</a></h2>
 <pre><code class="language-sh">rw; pacman -Syyu
 reboot
@@ -541,125 +779,7 @@ systemctl start promtail.service
 </code></pre>
 </li>
 </ol>
-<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/pikvm.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="nas"><a class="header" href="#nas">NAS</a></h1>
-<p>Outside of using <a href="https://github.com/ansible/ansible">Ansible</a> for configuring the OS, there are some manual steps I did to set it up.</p>
-<h2 id="zfs"><a class="header" href="#zfs">ZFS</a></h2>
-<h3 id="mirrored-zpool"><a class="header" href="#mirrored-zpool">Mirrored Zpool</a></h3>
-<ol>
-<li>
-<p>Create initial pool and set configuration</p>
-<pre><code class="language-sh">sudo zpool create -o ashift=12 -f eros mirror \
-    /dev/disk/by-id/scsi-SATA_WDC_WD120EDGZ-11_9LHWA5KG \
-    /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_9MG0AHZA
-sudo zfs set atime=off eros
-sudo zfs set compression=lz4 eros
-</code></pre>
-</li>
-<li>
-<p>Attach more mirrors</p>
-<pre><code class="language-sh">sudo zpool add eros mirror \
-    /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0B3D2 \
-    /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_X1G3B01L
-</code></pre>
-</li>
-<li>
-<p>Add spares</p>
-<pre><code class="language-sh">sudo zpool add -f eros spare \
-    /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_QGGETR5T
-</code></pre>
-</li>
-</ol>
-<h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
-<ol>
-<li>
-<p>Create datasets</p>
-<pre><code class="language-sh">sudo zfs create eros/Apps
-sudo zfs create eros/Apps/MinIO
-sudo zfs create eros/Media
-</code></pre>
-</li>
-<li>
-<p>Share dataset over NFS</p>
-<pre><code class="language-sh">sudo zfs set \
-    sharenfs=&quot;no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24,ro=192.168.150.21,ro=192.168.150.28&quot; \
-    eros/Media
-sudo zfs set \
-    sharenfs=&quot;no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24&quot; \
-    eros/Apps/MinIO
-</code></pre>
-</li>
-<li>
-<p>Dataset Permissions</p>
-<pre><code class="language-sh">sudo chmod 770 /eros/Media
-sudo chown -R devin:users /eros/Media
-</code></pre>
-</li>
-</ol>
-<h3 id="snapshots"><a class="header" href="#snapshots">Snapshots</a></h3>
-<ol>
-<li>
-<p>Add or replace the file <code>/etc/sanoid/sanoid.conf</code></p>
-<pre><code class="language-ini">[eros/Media]
-use_template = media
-
-[template_media]
-frequently = 0
-hourly = 0
-daily = 7
-monthly = 0
-yearly = 0
-autosnap = yes
-autoprune = yes
-</code></pre>
-</li>
-<li>
-<p>Start and enable sanoid</p>
-<pre><code class="language-sh">sudo systemctl enable --now sanoid.timer
-</code></pre>
-</li>
-<li>
-<p>Give a local user access to a specific datasets snapshots</p>
-<pre><code class="language-sh">sudo zfs allow -u jeff send,snapshot,hold eros/Media
-</code></pre>
-</li>
-</ol>
-<h2 id="nfs"><a class="header" href="#nfs">NFS</a></h2>
-<h3 id="local-nfs-shares"><a class="header" href="#local-nfs-shares">Local NFS Shares</a></h3>
-<ol>
-<li>
-<p>Add or replace file <code>/etc/exports.d/local.exports</code></p>
-<pre><code class="language-text">/share/PVCs 192.168.1.0/24(sec=sys,rw,no_subtree_check,all_squash,anonuid=568,anongid=100)
-/share/PVCs 192.168.42.0/24(sec=sys,rw,no_subtree_check,all_squash,anonuid=568,anongid=100)
-</code></pre>
-</li>
-<li>
-<p>Dataset Permissions</p>
-<pre><code class="language-sh">sudo chmod 770 /share/PVCs
-sudo chown -R devin:users /share/PVCs
-</code></pre>
-</li>
-<li>
-<p>Reload exports</p>
-<pre><code class="language-sh">sudo exportfs -arv
-</code></pre>
-</li>
-</ol>
-<h2 id="misc"><a class="header" href="#misc">Misc</a></h2>
-<h3 id="badblocks"><a class="header" href="#badblocks">Badblocks</a></h3>
-<div id="admonition-warning" class="admonition warning">
-<div class="admonition-title">
-<p>Warning</p>
-<p><a class="admonition-anchor-link" href="notes/nas.html#admonition-warning"></a></p>
-</div>
-<div>
-<p>This command is <strong>very destructive</strong> and should only be used to check for bad sectors</p>
-</div>
-</div>
-<pre><code class="language-sh">sudo badblocks -b 4096 -wsv /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
-</code></pre>
-<h3 id="lenovo-sa120"><a class="header" href="#lenovo-sa120">Lenovo SA120</a></h3>
-<p>Due to the loudness of the fans, they can be adjusted by using <ins><a href="https://github.com/AndrewX192/lenovo-sa120-fanspeed-utility.git">AndrewX192/lenovo-sa120-fanspeed-utility</a></ins>.</p>
-<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/nas.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="s3-buckets"><a class="header" href="#s3-buckets">S3 buckets</a></h1>
+<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/pikvm.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="s3-buckets"><a class="header" href="#s3-buckets">S3 buckets</a></h1>
 <p>Alternatively creating s3 buckets can be automated with Terraform.</p>
 <h2 id="b2"><a class="header" href="#b2">b2</a></h2>
 <div id="admonition-info" class="admonition info">
@@ -967,9 +1087,15 @@ spec:
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/secret-variations-with-flux.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="yaml-madness"><a class="header" href="#yaml-madness">YAML Madness</a></h1>
 <p>YAML aliases, anchors and overrides are a great way to keep your manifests DRY (<strong>D</strong>o not <strong>R</strong>epeat <strong>Y</strong>ourself) but only on a very basic level.</p>
 <h2 id="anchors-and-aliases"><a class="header" href="#anchors-and-aliases">Anchors and Aliases</a></h2>
-<blockquote>
+<div id="admonition-note" class="admonition note">
+<div class="admonition-title">
+<p>Note</p>
+<p><a class="admonition-anchor-link" href="notes/yaml-madness.html#admonition-note"></a></p>
+</div>
+<div>
 <p>The anchor operator <strong>&amp;</strong> is a way to define a variable and the alias character <strong>*</strong> is a way to reference the value defined in the anchor.</p>
-</blockquote>
+</div>
+</div>
 <pre><code class="language-yaml">apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -988,9 +1114,15 @@ metadata:
     app.kubernetes.io/name: &quot;awesome-app&quot;
 </code></pre>
 <h2 id="overrides"><a class="header" href="#overrides">Overrides</a></h2>
-<blockquote>
+<div id="admonition-note-1" class="admonition note">
+<div class="admonition-title">
+<p>Note</p>
+<p><a class="admonition-anchor-link" href="notes/yaml-madness.html#admonition-note-1"></a></p>
+</div>
+<div>
 <p>The <strong>&lt;&lt;</strong> operator allows referencing a block of YAML as many times as needed.</p>
-</blockquote>
+</div>
+</div>
 <pre><code class="language-yaml">apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

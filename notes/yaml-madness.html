@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="../notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="../notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="../notes/secret-variations-with-flux.html">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="../notes/yaml-madness.html" class="active">YAML Madness</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="../notes/opnsense.html">Opnsense</a></li><li class="chapter-item expanded "><a href="../notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="../notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="../notes/secret-variations-with-flux.html">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="../notes/yaml-madness.html" class="active">YAML Madness</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -148,9 +148,15 @@
                         <h1 id="yaml-madness"><a class="header" href="#yaml-madness">YAML Madness</a></h1>
 <p>YAML aliases, anchors and overrides are a great way to keep your manifests DRY (<strong>D</strong>o not <strong>R</strong>epeat <strong>Y</strong>ourself) but only on a very basic level.</p>
 <h2 id="anchors-and-aliases"><a class="header" href="#anchors-and-aliases">Anchors and Aliases</a></h2>
-<blockquote>
+<div id="admonition-note" class="admonition note">
+<div class="admonition-title">
+<p>Note</p>
+<p><a class="admonition-anchor-link" href="#admonition-note"></a></p>
+</div>
+<div>
 <p>The anchor operator <strong>&amp;</strong> is a way to define a variable and the alias character <strong>*</strong> is a way to reference the value defined in the anchor.</p>
-</blockquote>
+</div>
+</div>
 <pre><code class="language-yaml">apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -169,9 +175,15 @@ metadata:
     app.kubernetes.io/name: &quot;awesome-app&quot;
 </code></pre>
 <h2 id="overrides"><a class="header" href="#overrides">Overrides</a></h2>
-<blockquote>
+<div id="admonition-note-1" class="admonition note">
+<div class="admonition-title">
+<p>Note</p>
+<p><a class="admonition-anchor-link" href="#admonition-note-1"></a></p>
+</div>
+<div>
 <p>The <strong>&lt;&lt;</strong> operator allows referencing a block of YAML as many times as needed.</p>
-</blockquote>
+</div>
+</div>
 <pre><code class="language-yaml">apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
