@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Secret variations with Flux - Home Operations</title>
+        <title>Proxmox Considerations - Home Operations</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="../notes/opnsense.html">Opnsense</a></li><li class="chapter-item expanded "><a href="../notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="../notes/proxmox-considerations.html">Proxmox Considerations</a></li><li class="chapter-item expanded "><a href="../notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="../notes/secret-variations-with-flux.html" class="active">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="../notes/yaml-madness.html">YAML Madness</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="../notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="../notes/opnsense.html">Opnsense</a></li><li class="chapter-item expanded "><a href="../notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="../notes/proxmox-considerations.html" class="active">Proxmox Considerations</a></li><li class="chapter-item expanded "><a href="../notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="../notes/secret-variations-with-flux.html">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="../notes/yaml-madness.html">YAML Madness</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -145,144 +145,40 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="secret-variations-with-flux"><a class="header" href="#secret-variations-with-flux">Secret variations with Flux</a></h1>
-<p>There are several different ways to utilize Kubernetes secrets when using <ins><a href="https://fluxcd.io/">Flux</a></ins> and <ins><a href="https://github.com/mozilla/sops">SOPS</a></ins>, here’s a breakdown of some common methods.</p>
-<p><em>I will not be covering how to integrate SOPS into Flux for that be sure to check out the <ins><a href="https://fluxcd.io/docs/guides/mozilla-sops/">Flux documentation on integrating SOPS</a></ins></em></p>
-<h2 id="example-secret"><a class="header" href="#example-secret">Example Secret</a></h2>
-<div id="admonition-info" class="admonition info">
-<div class="admonition-title">
-<p>Info</p>
-<p><a class="admonition-anchor-link" href="#admonition-info"></a></p>
-</div>
-<div>
-<p>The three following methods will use this secret as an example.</p>
-</div>
-</div>
-<pre><code class="language-yaml">apiVersion: v1
-kind: Secret
-metadata:
-  name: application-secret
-  namespace: default
-stringData:
-  AWESOME_SECRET: &quot;SUPER SECRET VALUE&quot;
-</code></pre>
-<h3 id="method-1-envfrom"><a class="header" href="#method-1-envfrom">Method 1: <code>envFrom</code></a></h3>
-<blockquote>
-<p><em>Use <code>envFrom</code> in a deployment or a Helm chart that supports the setting, this will pass all secret items from the secret into the containers environment.</em></p>
-</blockquote>
-<pre><code class="language-yaml">envFrom:
-  - secretRef:
-      name: application-secret
-</code></pre>
-<div id="admonition-example" class="admonition example">
-<div class="admonition-title">
-<p>Example</p>
-<p><a class="admonition-anchor-link" href="#admonition-example"></a></p>
-</div>
-<div>
-<p>View example <ins><a href="https://ln.devbu.io/ngLju">Helm Release</a></ins> and corresponding <ins><a href="https://ln.devbu.io/ULgnl">Secret</a></ins>.</p>
-</div>
-</div>
-<h3 id="method-2-envvaluefrom"><a class="header" href="#method-2-envvaluefrom">Method 2: <code>env.valueFrom</code></a></h3>
-<blockquote>
-<p><em>Similar to the above but it's possible with <code>env</code> to pick an item from a secret.</em></p>
-</blockquote>
-<pre><code class="language-yaml">env:
-  - name: WAY_COOLER_ENV_VARIABLE
-    valueFrom:
-      secretKeyRef:
-        name: application-secret
-        key: AWESOME_SECRET
-</code></pre>
-<div id="admonition-example-1" class="admonition example">
-<div class="admonition-title">
-<p>Example</p>
-<p><a class="admonition-anchor-link" href="#admonition-example-1"></a></p>
-</div>
-<div>
-<p>View example <ins><a href="https://ln.devbu.io/0lbMT">Helm Release</a></ins> and corresponding <ins><a href="https://ln.devbu.io/KYjhP">Secret</a></ins>.</p>
-</div>
-</div>
-<h3 id="method-3-specvaluesfrom"><a class="header" href="#method-3-specvaluesfrom">Method 3: <code>spec.valuesFrom</code></a></h3>
-<blockquote>
-<p><em>The Flux HelmRelease option <code>valuesFrom</code> can inject a secret item into the Helm values of a <code>HelmRelease</code></em></p>
+                        <h1 id="proxmox-considerations"><a class="header" href="#proxmox-considerations">Proxmox Considerations</a></h1>
+<p>I am using bare metal nodes but here's some considerations when using Proxmox.</p>
+<h2 id="single-node-pve-cluster"><a class="header" href="#single-node-pve-cluster">Single Node PVE Cluster</a></h2>
+<ol>
+<li>Use physical separate disks used for the PVE install, k8s VMs and Longhorn/rook-ceph</li>
+<li>Don't put k8s VMs or Longhorn/rook-ceph on HDDs, only use SSDs or NVMe</li>
+<li>Use k3s with a single master node (4CPU/8GB RAM/50GB disk) that is using sqlite instead of etcd and taint it.</li>
+<li>Use as many worker nodes as you want but start with 3 and add more later on if you need them.</li>
+</ol>
+<h2 id="dual-node-pve-cluster"><a class="header" href="#dual-node-pve-cluster">Dual node PVE Cluster</a></h2>
+<ol>
+<li>Buy another node for your PVE cluster or refer to Single Node PVE Cluster.</li>
+</ol>
+<h2 id="tripe-node-pve-cluster"><a class="header" href="#tripe-node-pve-cluster">Tripe node PVE Cluster</a></h2>
+<ol>
+<li>Use physical separate disks used for the PVE install, k8s VMs and Longhorn</li>
+<li>Don't put k8s VMs or Longhorn on HDDs, only use SSDs or NVMe</li>
+<li>Evenly spread out your k8s masters and workers across each PVE node
 <ul>
-<li><em>Does not work with merging array values</em></li>
-<li><em>Care needed with keys that contain dot notation in the name</em></li>
+<li>In a 3 master/3 worker setup put one master on each PVE node and one worker on each PVE node.</li>
 </ul>
-</blockquote>
-<pre><code class="language-yaml">valuesFrom:
-  - targetPath: config.&quot;admin\.password&quot;
-    kind: Secret
-    name: application-secret
-    valuesKey: AWESOME_SECRET
-</code></pre>
-<div id="admonition-example-2" class="admonition example">
-<div class="admonition-title">
-<p>Example</p>
-<p><a class="admonition-anchor-link" href="#admonition-example-2"></a></p>
-</div>
-<div>
-<p>View example <ins><a href="https://ln.devbu.io/ARdun">Helm Release</a></ins> and corresponding <ins><a href="https://ln.devbu.io/hNef8">Secret</a></ins>.</p>
-</div>
-</div>
-<h3 id="method-4-variable-substitution-with-flux"><a class="header" href="#method-4-variable-substitution-with-flux">Method 4: Variable Substitution with Flux</a></h3>
-<blockquote>
-<p><em>Flux variable substitution can inject secrets into any YAML manifest. This requires the <ins><a href="https://fluxcd.io/docs/components/kustomize/kustomization/">Flux Kustomization</a></ins> configured to enable <ins><a href="https://fluxcd.io/docs/components/kustomize/kustomization/#variable-substitution">variable substitution</a></ins>. Correctly configured this allows you to use <code>${GLOBAL_AWESOME_SECRET}</code> in any YAML manifest.</em></p>
-</blockquote>
-<pre><code class="language-yaml">apiVersion: v1
-kind: Secret
-metadata:
-  name: cluster-secrets
-  namespace: flux-system
-stringData:
-  GLOBAL_AWESOME_SECRET: &quot;GLOBAL SUPER SECRET VALUE&quot;
-</code></pre>
-<pre><code class="language-yaml">apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-# ...
-spec:
-# ...
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
-  postBuild:
-    substituteFrom:
-      - kind: Secret
-        name: cluster-secrets
-</code></pre>
-<div id="admonition-example-3" class="admonition example">
-<div class="admonition-title">
-<p>Example</p>
-<p><a class="admonition-anchor-link" href="#admonition-example-3"></a></p>
-</div>
-<div>
-<p>View example <ins><a href="https://ln.devbu.io/ZMbfI">Fluxtomization</a></ins>, <ins><a href="https://ln.devbu.io/y6DJS">Helm Release</a></ins>, and corresponding <ins><a href="https://ln.devbu.io/kRoHj">Secret</a></ins>.</p>
-</div>
-</div>
-<h2 id="final-thoughts"><a class="header" href="#final-thoughts">Final Thoughts</a></h2>
-<ul>
-<li>
-<p>For the first <strong>three methods</strong> consider using a tool like <ins><a href="https://github.com/stakater/Reloader">stakater/reloader</a></ins> to restart the pod when the secret changes.</p>
 </li>
-<li>
-<p>Using reloader on a pod using a secret provided by Flux Variable Substitution will lead to pods being restarted during any change to the secret while related to the pod or not.</p>
-</li>
-<li>
-<p>The last method should be used when all other methods are not an option, or used when you have a “global” secret used by a bunch of YAML manifests.</p>
-</li>
-</ul>
-<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/secret-variations-with-flux.md">Edit this page on GitHub</a></footer>
+<li>Instead of Longhron, consider setting up a <ins><a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a></ins> and use <ins><a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a></ins> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
+</ol>
+<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/proxmox-considerations.md">Edit this page on GitHub</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../notes/s3-buckets.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../notes/pikvm.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../notes/yaml-madness.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../notes/s3-buckets.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -292,11 +188,11 @@ spec:
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../notes/s3-buckets.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../notes/pikvm.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../notes/yaml-madness.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../notes/s3-buckets.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="notes/opnsense.html">Opnsense</a></li><li class="chapter-item expanded "><a href="notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="notes/secret-variations-with-flux.html">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="notes/yaml-madness.html">YAML Madness</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Welcome</li><li class="spacer"></li><li class="chapter-item expanded "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Basement Notes</li><li class="spacer"></li><li class="chapter-item expanded "><a href="notes/nas.html">NAS</a></li><li class="chapter-item expanded "><a href="notes/opnsense.html">Opnsense</a></li><li class="chapter-item expanded "><a href="notes/pikvm.html">PiKVM</a></li><li class="chapter-item expanded "><a href="notes/proxmox-considerations.html">Proxmox Considerations</a></li><li class="chapter-item expanded "><a href="notes/s3-buckets.html">S3 buckets</a></li><li class="chapter-item expanded "><a href="notes/secret-variations-with-flux.html">Secret variations with Flux</a></li><li class="chapter-item expanded "><a href="notes/yaml-madness.html">YAML Madness</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -779,7 +779,31 @@ systemctl start promtail.service
 </code></pre>
 </li>
 </ol>
-<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/pikvm.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="s3-buckets"><a class="header" href="#s3-buckets">S3 buckets</a></h1>
+<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/pikvm.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="proxmox-considerations"><a class="header" href="#proxmox-considerations">Proxmox Considerations</a></h1>
+<p>I am using bare metal nodes but here's some considerations when using Proxmox.</p>
+<h2 id="single-node-pve-cluster"><a class="header" href="#single-node-pve-cluster">Single Node PVE Cluster</a></h2>
+<ol>
+<li>Use physical separate disks used for the PVE install, k8s VMs and Longhorn/rook-ceph</li>
+<li>Don't put k8s VMs or Longhorn/rook-ceph on HDDs, only use SSDs or NVMe</li>
+<li>Use k3s with a single master node (4CPU/8GB RAM/50GB disk) that is using sqlite instead of etcd and taint it.</li>
+<li>Use as many worker nodes as you want but start with 3 and add more later on if you need them.</li>
+</ol>
+<h2 id="dual-node-pve-cluster"><a class="header" href="#dual-node-pve-cluster">Dual node PVE Cluster</a></h2>
+<ol>
+<li>Buy another node for your PVE cluster or refer to Single Node PVE Cluster.</li>
+</ol>
+<h2 id="tripe-node-pve-cluster"><a class="header" href="#tripe-node-pve-cluster">Tripe node PVE Cluster</a></h2>
+<ol>
+<li>Use physical separate disks used for the PVE install, k8s VMs and Longhorn</li>
+<li>Don't put k8s VMs or Longhorn on HDDs, only use SSDs or NVMe</li>
+<li>Evenly spread out your k8s masters and workers across each PVE node
+<ul>
+<li>In a 3 master/3 worker setup put one master on each PVE node and one worker on each PVE node.</li>
+</ul>
+</li>
+<li>Instead of Longhron, consider setting up a <ins><a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a></ins> and use <ins><a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a></ins> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
+</ol>
+<footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/proxmox-considerations.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="s3-buckets"><a class="header" href="#s3-buckets">S3 buckets</a></h1>
 <p>Alternatively creating s3 buckets can be automated with Terraform.</p>
 <h2 id="b2"><a class="header" href="#b2">b2</a></h2>
 <div id="admonition-info" class="admonition info">
