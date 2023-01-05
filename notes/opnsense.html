@@ -190,13 +190,13 @@
 </ol>
 </li>
 </ol>
-<div id="admonition-info" class="admonition info">
+<div id="admonition-warning" class="admonition warning">
 <div class="admonition-title">
-<p>Info</p>
-<p><a class="admonition-anchor-link" href="#admonition-info"></a></p>
+<p>Warning</p>
+<p><a class="admonition-anchor-link" href="#admonition-warning"></a></p>
 </div>
 <div>
-<p>Without updating the configuration described in step 4 the routes from a client will only take a single path to your Kubernetes workloads even if they are scaled to more than one.</p>
+<p>Without updating the configuration described in <strong>step 4</strong> the routes from a client will only take a <strong>single path to your Kubernetes workloads</strong> even if they are scaled to more than one.</p>
 </div>
 </div>
 <h2 id="haproxy"><a class="header" href="#haproxy">HAProxy</a></h2>
@@ -263,6 +263,49 @@
 <li><code>Server Timeout</code> = <code>4h</code></li>
 <li>Save</li>
 </ol>
+</li>
+</ol>
+<h2 id="receive-side-scaling-rss"><a class="header" href="#receive-side-scaling-rss">Receive Side Scaling (RSS)</a></h2>
+<p>RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click <ins><a href="https://forum.opnsense.org/index.php?topic=24409.0">here</a></ins> to learn more about it.</p>
+<ol>
+<li>System &gt; Settings &gt; Tunables
+<ol>
+<li>Add <code>net.inet.rss.enabled</code> and set the value to <code>1</code></li>
+<li>Add <code>net.inet.rss.bits</code> and set to <code>2</code></li>
+<li>Add <code>net.isr.dispatch</code> and set to <code>hybrid</code></li>
+<li>Add <code>net.isr.bindthreads</code> and set to <code>1</code></li>
+<li>Add <code>net.isr.maxthreads</code> and set to <code>-1</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Reboot</li>
+<li>Verify with <code>sudo netstat -Q</code>
+<pre><code class="language-text">Configuration:
+Setting                        Current        Limit
+Thread count                         8            8
+Default queue limit                256        10240
+Dispatch policy                 hybrid          n/a
+Threads bound to CPUs          enabled          n/a
+</code></pre>
+</li>
+</ol>
+<h2 id="syslog"><a class="header" href="#syslog">Syslog</a></h2>
+<p>Firewall logs are being sent to <a href="https://github.com/vectordotdev/vector">Vector</a> which is running in my Kubernetes cluster. Vector is then shipping the logs to <a href="https://github.com/grafana/loki">Loki</a> which is also running in my cluster.</p>
+<ol>
+<li>System &gt; Settings &gt; Logging / targets
+<ul>
+<li>Add new logging target
+<ol>
+<li><code>Enabled</code> = <code>true</code></li>
+<li><code>Transport</code> = <code>UDP(4)</code></li>
+<li><code>Applications</code> = <code>filter (filterlog)</code></li>
+<li><code>Hostname</code> = <code>192.168.69.111</code> (Loki's Load Balancer IP)</li>
+<li><code>Port</code> = <code>5140</code></li>
+<li><code>rfc5424</code> = <code>true</code></li>
+<li>Save</li>
+</ol>
+</li>
+</ul>
 </li>
 </ol>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/opnsense.md">Edit this page on GitHub</a></footer>
