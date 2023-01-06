@@ -236,14 +236,15 @@ GitRepository :: home-ops-kubernetes
 <tr><td>Management VLAN</td><td><code>192.168.1.0/24</code></td></tr>
 <tr><td>Kubernetes Nodes VLAN</td><td><code>192.168.42.0/24</code></td></tr>
 <tr><td>Kubernetes external services (Calico w/ BGP)</td><td><code>192.168.69.0/24</code></td></tr>
-<tr><td>Kubernetes pods</td><td><code>10.42.0.0/16</code></td></tr>
-<tr><td>Kubernetes services</td><td><code>10.43.0.0/16</code></td></tr>
+<tr><td>Kubernetes pods (Calico w/ BGP)</td><td><code>10.42.0.0/16</code></td></tr>
+<tr><td>Kubernetes services (Calico w/ BGP)</td><td><code>10.43.0.0/16</code></td></tr>
 </tbody></table>
 </div>
 <ul>
 <li>HAProxy configured on my <code>Opnsense</code> router for the Kubernetes Control Plane Load Balancer.</li>
 <li>Calico configured with <code>externalIPs</code> to expose Kubernetes services with their own IP over BGP (w/ECMP) which is configured on my router.</li>
 </ul>
+<p>🔸 See <a href="https://onedr0p.github.io/home-ops/notes/opnsense.html">here</a> for how I configured HAProxy and BGP on Opnsense.</p>
 <hr />
 <h2 id="-cloud-dependencies"><a class="header" href="#-cloud-dependencies">☁️ Cloud Dependencies</a></h2>
 <p>While most of my infrastructure and workloads are selfhosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about two things. (1) Dealing with chicken/egg scenarios and (2) services I critically need whether my cluster is online or not.</p>
@@ -265,7 +266,6 @@ GitRepository :: home-ops-kubernetes
 <h3 id="ingress-controller"><a class="header" href="#ingress-controller">Ingress Controller</a></h3>
 <p>Over WAN, I have port forwarded ports <code>80</code> and <code>443</code> to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.</p>
 <p><a href="https://www.cloudflare.com/">Cloudflare</a> works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port <code>80</code> and <code>443</code> comes from Cloudflare. In <code>Opnsense</code> I block all IPs not originating from the <a href="https://www.cloudflare.com/ips/">Cloudflares list of IP ranges</a>.</p>
-<p>🔸 <em>Cloudflare is also configured to GeoIP block all countries except a few I have whitelisted</em></p>
 <h3 id="internal-dns"><a class="header" href="#internal-dns">Internal DNS</a></h3>
 <p><a href="https://github.com/coredns/coredns">coredns</a> is deployed on my <code>Opnsense</code> router and listening on <code>127.0.0.1:53</code>. All DNS queries for <em><strong>my</strong></em> domains are forwarded to <a href="https://github.com/ori-edge/k8s_gateway">k8s_gateway</a> that is running in my cluster. With this setup <code>k8s_gateway</code> has direct access to my clusters ingresses and services and serves DNS for them in my internal network.</p>
 <h3 id="ad-blocking"><a class="header" href="#ad-blocking">Ad Blocking</a></h3>
