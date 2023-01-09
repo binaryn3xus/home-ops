@@ -851,15 +851,15 @@ systemctl start promtail.service
 </li>
 </ol>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/pikvm.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="proxmox-considerations"><a class="header" href="#proxmox-considerations">Proxmox Considerations</a></h1>
-<p>I am using bare metal nodes but here's some considerations when using Kubernetes on Proxmox. These are just my opinions gathered from experiance I've witnessed first or second hand. Following along will net you a very stable Kubernetes cluster on PVE.</p>
+<p>I am using bare metal nodes but here's some considerations when using Kubernetes on Proxmox. These are just my opinions gathered from experiance I've witnessed first or second hand. I will always <strong>advocate for bare metal Kubernetes</strong> due to the overhead of VMs and disk concerns, however following along below will net you a very stable Kubernetes cluster on PVE.</p>
 <div id="admonition-warning" class="admonition warning">
 <div class="admonition-title">
 <p>Warning</p>
 <p><a class="admonition-anchor-link" href="notes/proxmox-considerations.html#admonition-warning"></a></p>
 </div>
 <div>
-<p>Preface: etcd is really read/write intensive and requires low iops/latency. With using the same disks and due to the way etcd works anytime a commit happens to etcd (which is probably hundreds of times per second), it will flood the same filesystem with 3x the amount of reads and writes</p>
-<p>Now if you layer on Longhorn or rook-ceph to the same filesystem you are just asking for trouble, because that is also replicated.</p>
+<p>Preface: etcd <strong>needs 3 master/control plane nodes for quorum</strong> also it is really read/write intensive and requires low iops/latency. With using the same disk for all master nodes and due to the way etcd works anytime a commit happens to etcd (which is probably hundreds of times per second), it will flood the same filesystem with 3x the amount of reads and writes</p>
+<p>Now if you layer on Longhorn or rook-ceph to the <strong>same</strong> filesystem you are just asking for trouble, because that is also replicated.</p>
 </div>
 </div>
 <h2 id="single-node-pve-cluster"><a class="header" href="#single-node-pve-cluster">Single Node PVE Cluster</a></h2>
@@ -873,14 +873,14 @@ systemctl start promtail.service
 <h2 id="dual-node-pve-cluster"><a class="header" href="#dual-node-pve-cluster">Dual node PVE Cluster</a></h2>
 <p>Buy another node for your PVE cluster or refer to Single Node PVE Cluster, <em>however if you must...</em></p>
 <ol>
-<li>Use k3s with a dual master nodes (4CPU/8GB RAM/50GB disk each) that is using postgresql/mysql/mariadb instead of etcd.</li>
-<li>Put the postgresql/mysql/mariadb database on a VM on your first PVE cluster and never touch it.</li>
+<li>Use k3s with a dual master nodes (2vCPU/8GB RAM/50GB disk each) that is using postgresql/mariadb/mysql (in that order) instead of etcd.</li>
+<li>Put the postgresql/mysql/mariadb database on a VM on your first PVE cluster. However, without some architecting this means that your cluster store is not highly available and is a single point of failure.</li>
 <li>Evenly spread out your k8s masters and workers across each PVE node
 <ul>
 <li>In a 2 master/3 worker setup put one master on each PVE node and try to even out the workers on each PVE node.</li>
 </ul>
 </li>
-<li>Consider using <ins><a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a></ins> over Longhorn or rook-ceph if you aren't able physically separate the disks.</li>
+<li>Consider using <ins><a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a></ins> for application config data over Longhorn or rook-ceph if you aren't able physically separate the disks between Proxmox, VMs and Longhorn/rook-ceph.</li>
 </ol>
 <h2 id="tripe-node-pve-cluster"><a class="header" href="#tripe-node-pve-cluster">Tripe node PVE Cluster</a></h2>
 <ol>
@@ -891,7 +891,7 @@ systemctl start promtail.service
 <li>In a 3 master/3 worker setup put one master on each PVE node and one worker on each PVE node.</li>
 </ul>
 </li>
-<li>Instead of Longhron, consider setting up a <ins><a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a></ins> and use <ins><a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a></ins> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
+<li>Instead of Longhorn, consider setting up a <ins><a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a></ins> and use <ins><a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a></ins> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
 </ol>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/proxmox-considerations.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="s3-buckets"><a class="header" href="#s3-buckets">S3 buckets</a></h1>
 <p>Alternatively creating s3 buckets can be automated with Terraform.</p>
