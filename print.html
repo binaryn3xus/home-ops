@@ -583,6 +583,37 @@ Threads bound to CPUs          enabled          n/a
 </ul>
 </li>
 </ol>
+<h2 id="smtp-relay"><a class="header" href="#smtp-relay">SMTP Relay</a></h2>
+<p>To ease the use of application configuration I have a SMTP Relay running on Opnsense using the Postfix plugin. From applications deployed in my Kubernetes cluster, to my nas, to my printer, all use the same configuration for SMTP without authentication.</p>
+<ol>
+<li>System &gt; Services &gt; Postfix &gt; General
+<ol>
+<li><code>SMTP Client Security</code> = <code>encrypt</code></li>
+<li><code>Smart Host</code> = <code>[smtp.fastmail.com]:465</code></li>
+<li><code>Enable SMTP Authentication</code> = <code>true</code></li>
+<li><code>Authentication Username</code> = <code>devin@buhl.casa</code></li>
+<li><code>Authentication Password</code> = <code>&lt;app-password&gt;</code></li>
+<li><code>Permit SASL Authenticated</code> = <code>false</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>System &gt; Services &gt; Postfix &gt; Domains
+<ul>
+<li>Add new domain
+<ol>
+<li><code>Domainname</code> = <code>buhl.casa</code></li>
+<li><code>Destination</code> = <code>[smtp.fastmail.com]:465</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Apply</li>
+</ul>
+</li>
+<li>Verify
+<pre><code class="language-sh">swaks --server opnsense.turbo.ac --port 25 --to devin@buhl.casa --from devin@buhl.casa
+</code></pre>
+</li>
+</ol>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/opnsense.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="pikvm"><a class="header" href="#pikvm">PiKVM</a></h1>
 <h2 id="update-pikvm"><a class="header" href="#update-pikvm">Update PiKVM</a></h2>
 <pre><code class="language-sh">rw; pacman -Syyu
