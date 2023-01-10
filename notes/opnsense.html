@@ -316,7 +316,7 @@ Threads bound to CPUs          enabled          n/a
 <li><code>SMTP Client Security</code> = <code>encrypt</code></li>
 <li><code>Smart Host</code> = <code>[smtp.fastmail.com]:465</code></li>
 <li><code>Enable SMTP Authentication</code> = <code>true</code></li>
-<li><code>Authentication Username</code> = <code>devin@buhl.casa</code></li>
+<li><code>Authentication Username</code> = <code>&lt;email-address&gt;</code></li>
 <li><code>Authentication Password</code> = <code>&lt;app-password&gt;</code></li>
 <li><code>Permit SASL Authenticated</code> = <code>false</code></li>
 <li>Save</li>
@@ -326,7 +326,7 @@ Threads bound to CPUs          enabled          n/a
 <ul>
 <li>Add new domain
 <ol>
-<li><code>Domainname</code> = <code>buhl.casa</code></li>
+<li><code>Domainname</code> = <code>&lt;email-domain&gt;</code></li>
 <li><code>Destination</code> = <code>[smtp.fastmail.com]:465</code></li>
 <li>Save</li>
 </ol>
@@ -335,7 +335,7 @@ Threads bound to CPUs          enabled          n/a
 </ul>
 </li>
 <li>Verify
-<pre><code class="language-sh">swaks --server opnsense.turbo.ac --port 25 --to devin@buhl.casa --from devin@buhl.casa
+<pre><code class="language-sh">swaks --server opnsense.turbo.ac --port 25 --to &lt;email-address&gt; --from &lt;email-address&gt;
 </code></pre>
 </li>
 </ol>

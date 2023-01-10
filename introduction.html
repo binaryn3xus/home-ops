@@ -184,7 +184,7 @@
 <h2 id="-kubernetes"><a class="header" href="#-kubernetes">⛵ Kubernetes</a></h2>
 <p>There is a template over at <a href="https://github.com/onedr0p/flux-cluster-template">onedr0p/flux-cluster-template</a> if you wanted to try and follow along with some of the practices I use here.</p>
 <h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
-<p>My cluster is <a href="https://k3s.io/">k3s</a> provisioned overtop bare-metal Fedora Server using the <a href="https://www.ansible.com/">Ansible</a> galaxy role <a href="https://github.com/PyratLabs/ansible-role-k3s">ansible-role-k3s</a>. This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.</p>
+<p>My cluster is <a href="https://k3s.io/">k3s</a> provisioned overtop bare-metal Ubuntu Server using the <a href="https://www.ansible.com/">Ansible</a> galaxy role <a href="https://github.com/PyratLabs/ansible-role-k3s">ansible-role-k3s</a>. This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.</p>
 <p>🔸 <em><a href="./ansible/">Click here</a> to see my Ansible playbooks and roles.</em></p>
 <h3 id="core-components"><a class="header" href="#core-components">Core Components</a></h3>
 <ul>
@@ -282,8 +282,8 @@ GitRepository :: home-ops-kubernetes
 </details>
 <div class="table-wrapper"><table><thead><tr><th>Device</th><th>Count</th><th>OS Disk Size</th><th>Data Disk Size</th><th>Ram</th><th>Operating System</th><th>Purpose</th></tr></thead><tbody>
 <tr><td>Protectli FW6D</td><td>1</td><td>500GB mSATA</td><td>-</td><td>16GB</td><td>Opnsense</td><td>Router</td></tr>
-<tr><td>Intel NUC8i3BEK</td><td>3</td><td>256GB NVMe</td><td>-</td><td>32GB</td><td>Fedora</td><td>Kubernetes Masters</td></tr>
-<tr><td>Intel NUC8i5BEH</td><td>3</td><td>240GB SSD</td><td>1TB NVMe (rook-ceph)</td><td>64GB</td><td>Fedora</td><td>Kubernetes Workers</td></tr>
+<tr><td>Intel NUC8i3BEK</td><td>3</td><td>256GB NVMe</td><td>-</td><td>32GB</td><td>Ubuntu</td><td>Kubernetes Masters</td></tr>
+<tr><td>Intel NUC8i5BEH</td><td>3</td><td>240GB SSD</td><td>1TB NVMe (rook-ceph)</td><td>64GB</td><td>Ubuntu</td><td>Kubernetes Workers</td></tr>
 <tr><td>PowerEdge T340</td><td>1</td><td>2TB SSD</td><td>8x12TB ZFS (mirrored vdevs)</td><td>64GB</td><td>Ubuntu</td><td>NFS + Backup Server</td></tr>
 <tr><td>Lenovo SA120</td><td>1</td><td>-</td><td>6x12TB (+2 hot spares)</td><td>-</td><td>-</td><td>DAS</td></tr>
 <tr><td>Raspberry Pi</td><td>1</td><td>32GB (SD)</td><td>-</td><td>4GB</td><td>PiKVM</td><td>Network KVM</td></tr>
