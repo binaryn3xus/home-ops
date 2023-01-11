@@ -486,7 +486,7 @@ sudo chown -R devin:users /share/PVCs
 <li><code>FQDN or IP</code> = <code>192.168.42.x</code></li>
 <li><code>Port</code> = <code>6443</code></li>
 <li><code>Verify SSL Certificate</code> = <code>false</code></li>
-<li>Save</li>
+<li>Apply/Save</li>
 <li>Continue adding servers until all your <strong>master nodes</strong> are present</li>
 </ol>
 </li>
@@ -500,7 +500,7 @@ sudo chown -R devin:users /share/PVCs
 <li><code>HTTP method</code> = <code>GET</code></li>
 <li><code>Request URI</code> = <code>/healthz</code></li>
 <li><code>HTTP version</code> = <code>HTTP/1.1</code></li>
-<li>Save</li>
+<li>Apply/Save</li>
 </ol>
 </li>
 <li>Services &gt; HAProxy | Virtual Services &gt; Backend Pools
@@ -512,23 +512,29 @@ sudo chown -R devin:users /share/PVCs
 <li><code>Source address</code> = <code>192.168.1.1</code> (Your Opnsense IP address)</li>
 <li><code>Enable Health Checking</code> = <code>true</code></li>
 <li><code>Health Monitor</code> = <code>k8s-apiserver-health</code></li>
-<li>Save</li>
+<li>Apply/Save</li>
 </ol>
 </li>
-<li>Services &gt; HAProxy | Virtual Services &gt; Frontend Pools
+<li>Services &gt; HAProxy | Virtual Services &gt; Public Services
 <ol>
 <li><code>Enabled</code> = <code>true</code></li>
 <li><code>Name</code> = <code>k8s-apiserver-fe</code></li>
 <li><code>Listen Addresses</code> = <code>192.168.1.1:6443</code> (Your Opnsense IP address. Use TAB key to complete typing a listen address)</li>
 <li><code>Type</code> = <code>TCP</code></li>
 <li><code>Default Backend Pool</code> = <code>k8s-apiserver-be</code></li>
-<li>Save</li>
+<li>Apply/Save</li>
 </ol>
 </li>
 <li>Services &gt; HAProxy | Settings &gt; Service
 <ol>
 <li><code>Enable HAProxy</code> = <code>true</code></li>
-<li>Save</li>
+<li>Apply/Save</li>
+</ol>
+</li>
+<li>Services &gt; HAProxy | Settings &gt; Global Parameters
+<ol>
+<li><code>Verify SSL Server Certificates</code> = <code>disable-verify</code></li>
+<li>Apply/Save</li>
 </ol>
 </li>
 <li>Services &gt; HAProxy | Settings &gt; Default Parameters
@@ -536,7 +542,7 @@ sudo chown -R devin:users /share/PVCs
 <li><code>Client Timeout</code> = <code>4h</code></li>
 <li><code>Connection Timeout</code> = <code>10s</code></li>
 <li><code>Server Timeout</code> = <code>4h</code></li>
-<li>Save</li>
+<li>Apply/Save</li>
 </ol>
 </li>
 </ol>
