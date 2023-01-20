@@ -322,7 +322,7 @@ Threads bound to CPUs          enabled          n/a
 <li><code>SMTP Client Security</code> = <code>encrypt</code></li>
 <li><code>Smart Host</code> = <code>[smtp.fastmail.com]:465</code></li>
 <li><code>Enable SMTP Authentication</code> = <code>true</code></li>
-<li><code>Authentication Username</code> = <code>&lt;email-address&gt;</code></li>
+<li><code>Authentication Username</code> = <code>devin@&lt;email-domain&gt;</code></li>
 <li><code>Authentication Password</code> = <code>&lt;app-password&gt;</code></li>
 <li><code>Permit SASL Authenticated</code> = <code>false</code></li>
 <li>Save</li>
@@ -334,6 +334,18 @@ Threads bound to CPUs          enabled          n/a
 <ol>
 <li><code>Domainname</code> = <code>&lt;email-domain&gt;</code></li>
 <li><code>Destination</code> = <code>[smtp.fastmail.com]:465</code></li>
+<li>Save</li>
+</ol>
+</li>
+<li>Apply</li>
+</ul>
+</li>
+<li>System &gt; Services &gt; Postfix &gt; Senders
+<ul>
+<li>Add new sender
+<ol>
+<li><code>Enabled</code> = <code>true</code></li>
+<li><code>Sender Address</code> = <code>admin@&lt;email-domain&gt;</code></li>
 <li>Save</li>
 </ol>
 </li>
