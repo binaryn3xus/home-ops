@@ -33,6 +33,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "";
@@ -166,7 +167,7 @@
 <p><a href="https://discord.gg/k8s-at-home"><img src="https://img.shields.io/discord/673534664354430999?style=for-the-badge&amp;label&amp;logo=discord&amp;logoColor=white&amp;color=blue" alt="Discord" /></a>
 <a href="https://k3s.io/"><img src="https://img.shields.io/badge/v1.26-blue?style=for-the-badge&amp;logo=kubernetes&amp;logoColor=white" alt="Kubernetes" /></a>
 <a href="https://github.com/onedr0p/home-ops/actions/workflows/renovate.yaml"><img src="https://img.shields.io/github/actions/workflow/status/onedr0p/home-ops/renovate.yaml?branch=main&amp;label=&amp;logo=renovatebot&amp;style=for-the-badge&amp;color=blue" alt="Renovate" /></a></p>
-<p><a href="https://uptimerobot.com"><img src="https://img.shields.io/uptimerobot/status/m793494864-dfc695db066960233ac70f45?color=brightgreeen&amp;label=Home%20Internet&amp;style=for-the-badge&amp;logo=opnSense&amp;logoColor=white" alt="Home-Internet" /></a>
+<p><a href="https://uptimerobot.com"><img src="https://img.shields.io/uptimerobot/status/m793494864-dfc695db066960233ac70f45?color=brightgreeen&amp;label=Home%20Internet&amp;style=for-the-badge&amp;logo=v&amp;logoColor=white" alt="Home-Internet" /></a>
 <a href="https://ln.devbu.io/Fl5ME"><img src="https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&amp;logoColor=white&amp;color=brightgreeen&amp;label=Plex&amp;style=for-the-badge" alt="Plex" /></a>
 <a href="https://ln.devbu.io/ApwUP"><img src="https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?logo=homeassistant&amp;logoColor=white&amp;color=brightgreeen&amp;label=Home%20Assistant&amp;style=for-the-badge" alt="Home-Assistant" /></a>
 <a href="https://ln.devbu.io/tu0B6"><img src="https://img.shields.io/uptimerobot/status/m792427620-04fcdd7089a84863ec9f398d?logo=grafana&amp;logoColor=white&amp;color=brightgreeen&amp;label=Grafana&amp;style=for-the-badge" alt="Grafana" /></a></p>
@@ -234,6 +235,10 @@ GitRepository :: home-ops-kubernetes
                 Cluster :: postgres
 </code></pre>
 <h3 id="networking"><a class="header" href="#networking">Networking</a></h3>
+<details>
+  <summary>Click to see a high level network diagram</summary>
+<img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/networks.png" align="center" width="600px" alt="dns"/>
+</details>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>CIDR</th></tr></thead><tbody>
 <tr><td>Management VLAN</td><td><code>192.168.1.0/24</code></td></tr>
 <tr><td>Kubernetes Nodes VLAN</td><td><code>192.168.42.0/24</code></td></tr>
@@ -243,10 +248,9 @@ GitRepository :: home-ops-kubernetes
 </tbody></table>
 </div>
 <ul>
-<li>HAProxy configured on my <code>Opnsense</code> router for the Kubernetes Control Plane Load Balancer.</li>
-<li>Calico configured with <code>externalIPs</code> to expose Kubernetes services with their own IP over BGP (w/ECMP) which is configured on my router.</li>
+<li>HAProxy is configured on my <code>VyOS</code> router for the Kubernetes Control Plane Load Balancer.</li>
+<li>Calico is configured with <code>externalIPs</code> to expose Kubernetes services with their own IP over BGP which is configured on my router.</li>
 </ul>
-<p>🔸 <em><a href="https://onedr0p.github.io/home-ops/notes/opnsense.html">Click here</a> to review how I configured HAProxy and BGP on Opnsense.</em></p>
 <hr />
 <h2 id="-cloud-dependencies"><a class="header" href="#-cloud-dependencies">☁️ Cloud Dependencies</a></h2>
 <p>While most of my infrastructure and workloads are selfhosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about two things. (1) Dealing with chicken/egg scenarios and (2) services I critically need whether my cluster is online or not.</p>
@@ -274,9 +278,9 @@ GitRepository :: home-ops-kubernetes
 </details>
 <h3 id="ingress-controller"><a class="header" href="#ingress-controller">Ingress Controller</a></h3>
 <p>Over WAN, I have port forwarded ports <code>80</code> and <code>443</code> to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.</p>
-<p><a href="https://www.cloudflare.com/">Cloudflare</a> works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port <code>80</code> and <code>443</code> comes from Cloudflare. In <code>Opnsense</code> I block all IPs not originating from the <a href="https://www.cloudflare.com/ips/">Cloudflares list of IP ranges</a>.</p>
+<p><a href="https://www.cloudflare.com/">Cloudflare</a> works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port <code>80</code> and <code>443</code> comes from Cloudflare. In <code>VyOS</code> I block all IPs not originating from the <a href="https://www.cloudflare.com/ips/">Cloudflares list of IP ranges</a>.</p>
 <h3 id="internal-dns"><a class="header" href="#internal-dns">Internal DNS</a></h3>
-<p><a href="https://github.com/coredns/coredns">CoreDNS</a> is deployed on my <code>Opnsense</code> router and listening on <code>:53</code>. All DNS queries for <em><strong>my</strong></em> domains are forwarded to <a href="https://github.com/ori-edge/k8s_gateway">k8s_gateway</a> that is running in my cluster. With this setup <code>k8s_gateway</code> has direct access to my clusters ingresses and services and serves DNS for them in my internal network. One additional thing is that I have <code>dnsmasq</code> running on <code>Opnsense</code> on port <code>5353</code> to only have it provide a host file for <code>CoreDNS</code>, this way I can have DNS for devices on my network.</p>
+<p><a href="https://github.com/coredns/coredns">CoreDNS</a> is deployed on my <code>VyOS</code> router and listening on <code>:53</code>. All DNS queries for <em><strong>my</strong></em> domains are forwarded to <a href="https://github.com/ori-edge/k8s_gateway">k8s_gateway</a> that is running in my cluster. With this setup <code>k8s_gateway</code> has direct access to my clusters ingresses and services and serves DNS for them in my internal network.</p>
 <h3 id="ad-blocking"><a class="header" href="#ad-blocking">Ad Blocking</a></h3>
 <p>The upstream server in CoreDNS is set to NextDNS which provides me with AdBlocking for all devices on my network.</p>
 <h3 id="external-dns"><a class="header" href="#external-dns">External DNS</a></h3>
@@ -291,7 +295,7 @@ GitRepository :: home-ops-kubernetes
 <img src="https://user-images.githubusercontent.com/213795/172947261-65a82dcd-3274-45bd-aabf-140d60a04aa9.png" align="center" width="200px" alt="rack"/>
 </details>
 <div class="table-wrapper"><table><thead><tr><th>Device</th><th>Count</th><th>OS Disk Size</th><th>Data Disk Size</th><th>Ram</th><th>Operating System</th><th>Purpose</th></tr></thead><tbody>
-<tr><td>Protectli FW6D</td><td>1</td><td>500GB mSATA</td><td>-</td><td>16GB</td><td>Opnsense</td><td>Router</td></tr>
+<tr><td>HP EliteDesk 800 G3 SFF</td><td>1</td><td>256GB NVMe</td><td>-</td><td>8GB</td><td>VyOS</td><td>Router</td></tr>
 <tr><td>Intel NUC8i3BEK</td><td>3</td><td>256GB NVMe</td><td>-</td><td>32GB</td><td>Ubuntu</td><td>Kubernetes Masters</td></tr>
 <tr><td>Intel NUC8i5BEH</td><td>3</td><td>240GB SSD</td><td>1TB NVMe (rook-ceph)</td><td>64GB</td><td>Ubuntu</td><td>Kubernetes Workers</td></tr>
 <tr><td>PowerEdge T340</td><td>1</td><td>2TB SSD</td><td>8x12TB ZFS (mirrored vdevs)</td><td>64GB</td><td>Ubuntu</td><td>NFS + Backup Server</td></tr>
@@ -356,5 +360,6 @@ GitRepository :: home-ops-kubernetes
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>
