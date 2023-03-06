@@ -191,7 +191,7 @@
 <p>There is a template over at <a href="https://github.com/onedr0p/flux-cluster-template">onedr0p/flux-cluster-template</a> if you wanted to try and follow along with some of the practices I use here.</p>
 <h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
 <p>My cluster is <a href="https://k3s.io/">k3s</a> provisioned overtop bare-metal Ubuntu Server using the <a href="https://www.ansible.com/">Ansible</a> galaxy role <a href="https://github.com/PyratLabs/ansible-role-k3s">ansible-role-k3s</a>. This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.</p>
-<p>🔸 <em><a href="./ansible/">Click here</a> to see my Ansible playbooks and roles.</em></p>
+<p>🔸 <em><a href="./provision/kubernetes/servers/">Click here</a> to see my Ansible playbooks and roles.</em></p>
 <h3 id="core-components"><a class="header" href="#core-components">Core Components</a></h3>
 <ul>
 <li><a href="https://github.com/actions/actions-runner-controller">actions-runner-controller</a>: Self-hosted Github runners.</li>
@@ -287,7 +287,7 @@ GitRepository :: home-ops-kubernetes
 <p>The upstream server in CoreDNS is set to NextDNS which provides me with AdBlocking for all devices on my network.</p>
 <h3 id="external-dns"><a class="header" href="#external-dns">External DNS</a></h3>
 <p><a href="https://github.com/kubernetes-sigs/external-dns">external-dns</a> is deployed in my cluster and configure to sync DNS records to <a href="https://www.cloudflare.com/">Cloudflare</a>. The only ingresses <code>external-dns</code> looks at to gather DNS records to put in <code>Cloudflare</code> are ones that have an annotation of <code>external-dns.alpha.kubernetes.io/target</code></p>
-<p>🔸 <em><a href="./terraform/cloudflare">Click here</a> to see how else I manage Cloudflare with Terraform.</em></p>
+<p>🔸 <em><a href="./provision/kubernetes/cloudflare">Click here</a> to see how else I manage Cloudflare with Terraform.</em></p>
 <hr />
 <h2 id="-hardware"><a class="header" href="#-hardware">🔧 Hardware</a></h2>
 <details>
