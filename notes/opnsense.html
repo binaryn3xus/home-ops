@@ -149,6 +149,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="opnsense"><a class="header" href="#opnsense">Opnsense</a></h1>
+<div id="admonition-warning" class="admonition warning">
+<div class="admonition-title">
+<p>Warning</p>
+<p><a class="admonition-anchor-link" href="#admonition-warning"></a></p>
+</div>
+<div>
+<p>I am no longer use Opnsense therefor this document will likely not be updated anymore.</p>
+</div>
+</div>
 <h2 id="bgp"><a class="header" href="#bgp">BGP</a></h2>
 <p>Instead of using Metallb for L2/L3 load balancer IPs I am using the Kubernetes Calico CNI with BGP which allows me to advertise load balancer IPs directly over BGP. This has some benefits like having equal cost multipath (ECMP) for scaled workloads in my cluster.</p>
 <ol>
@@ -193,10 +202,10 @@
 </ol>
 </li>
 </ol>
-<div id="admonition-warning" class="admonition warning">
+<div id="admonition-warning-1" class="admonition warning">
 <div class="admonition-title">
 <p>Warning</p>
-<p><a class="admonition-anchor-link" href="#admonition-warning"></a></p>
+<p><a class="admonition-anchor-link" href="#admonition-warning-1"></a></p>
 </div>
 <div>
 <p>Without updating the configuration described in <strong>step 4</strong> the routes from a client will only take a <strong>single path to your Kubernetes workloads</strong> even if they are scaled to more than one.</p>
@@ -275,7 +284,7 @@
 </li>
 </ol>
 <h2 id="receive-side-scaling-rss"><a class="header" href="#receive-side-scaling-rss">Receive Side Scaling (RSS)</a></h2>
-<p>RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click <ins><a href="https://forum.opnsense.org/index.php?topic=24409.0">here</a></ins> to learn more about it.</p>
+<p>RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click <a href="https://forum.opnsense.org/index.php?topic=24409.0">here</a> to learn more about it.</p>
 <ol>
 <li>System &gt; Settings &gt; Tunables
 <ol>

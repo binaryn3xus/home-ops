@@ -376,6 +376,7 @@ sudo chown -R devin:users /eros/Media
 </li>
 </ol>
 <h3 id="snapshots"><a class="header" href="#snapshots">Snapshots</a></h3>
+<p>Install zrepl by following <a href="https://zrepl.github.io/installation/apt-repos.html">these</a> instructions.</p>
 <ol>
 <li>
 <p>Add or replace the file <code>/etc/zrepl/zrepl.yml</code></p>
@@ -452,8 +453,17 @@ sudo chown -R devin:users /share/PVCs
 <pre><code class="language-sh">sudo badblocks -b 4096 -wsv /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
 </code></pre>
 <h3 id="lenovo-sa120"><a class="header" href="#lenovo-sa120">Lenovo SA120</a></h3>
-<p>Due to the loudness of the fans, they can be adjusted by using <ins><a href="https://github.com/AndrewX192/lenovo-sa120-fanspeed-utility.git">AndrewX192/lenovo-sa120-fanspeed-utility</a></ins>.</p>
+<p>Due to the loudness of the fans, they can be adjusted by using <a href="https://github.com/AndrewX192/lenovo-sa120-fanspeed-utility.git">AndrewX192/lenovo-sa120-fanspeed-utility</a>.</p>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/nas.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="opnsense"><a class="header" href="#opnsense">Opnsense</a></h1>
+<div id="admonition-warning" class="admonition warning">
+<div class="admonition-title">
+<p>Warning</p>
+<p><a class="admonition-anchor-link" href="notes/opnsense.html#admonition-warning"></a></p>
+</div>
+<div>
+<p>I am no longer use Opnsense therefor this document will likely not be updated anymore.</p>
+</div>
+</div>
 <h2 id="bgp"><a class="header" href="#bgp">BGP</a></h2>
 <p>Instead of using Metallb for L2/L3 load balancer IPs I am using the Kubernetes Calico CNI with BGP which allows me to advertise load balancer IPs directly over BGP. This has some benefits like having equal cost multipath (ECMP) for scaled workloads in my cluster.</p>
 <ol>
@@ -498,10 +508,10 @@ sudo chown -R devin:users /share/PVCs
 </ol>
 </li>
 </ol>
-<div id="admonition-warning" class="admonition warning">
+<div id="admonition-warning-1" class="admonition warning">
 <div class="admonition-title">
 <p>Warning</p>
-<p><a class="admonition-anchor-link" href="notes/opnsense.html#admonition-warning"></a></p>
+<p><a class="admonition-anchor-link" href="notes/opnsense.html#admonition-warning-1"></a></p>
 </div>
 <div>
 <p>Without updating the configuration described in <strong>step 4</strong> the routes from a client will only take a <strong>single path to your Kubernetes workloads</strong> even if they are scaled to more than one.</p>
@@ -580,7 +590,7 @@ sudo chown -R devin:users /share/PVCs
 </li>
 </ol>
 <h2 id="receive-side-scaling-rss"><a class="header" href="#receive-side-scaling-rss">Receive Side Scaling (RSS)</a></h2>
-<p>RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click <ins><a href="https://forum.opnsense.org/index.php?topic=24409.0">here</a></ins> to learn more about it.</p>
+<p>RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click <a href="https://forum.opnsense.org/index.php?topic=24409.0">here</a> to learn more about it.</p>
 <ol>
 <li>System &gt; Settings &gt; Tunables
 <ol>
@@ -875,7 +885,7 @@ EOL
   disable: true
 
 client:
-  url: &quot;https://loki.$domain/loki/api/v1/push&quot;
+  url: &quot;https://loki.devbu.io/loki/api/v1/push&quot;
 
 positions:
   filename: /tmp/positions.yaml
@@ -919,7 +929,7 @@ systemctl start promtail.service
 <li>Don't put k8s VMs or Longhorn/rook-ceph on HDDs, only use SSDs or NVMe</li>
 <li>Use k3s with a single master node (4CPU/8GB RAM/50GB disk) that is using sqlite instead of etcd and taint it.</li>
 <li>Use as many worker nodes as you want but start with 3 and add more later on if you need them.</li>
-<li>Consider using <ins><a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a></ins> over Longhorn or rook-ceph if you aren't able physically separate the disks.</li>
+<li>Consider using <a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a> over Longhorn or rook-ceph if you aren't able physically separate the disks.</li>
 </ol>
 <h2 id="dual-node-pve-cluster"><a class="header" href="#dual-node-pve-cluster">Dual node PVE Cluster</a></h2>
 <p>Buy another node for your PVE cluster or refer to Single Node PVE Cluster, <em>however if you must...</em></p>
@@ -931,7 +941,7 @@ systemctl start promtail.service
 <li>In a 2 master/3 worker setup put one master on each PVE node and try to even out the workers on each PVE node.</li>
 </ul>
 </li>
-<li>Consider using <ins><a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a></ins> for application config data over Longhorn or rook-ceph if you aren't able physically separate the disks between Proxmox, VMs and Longhorn/rook-ceph.</li>
+<li>Consider using <a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a> for application config data over Longhorn or rook-ceph if you aren't able physically separate the disks between Proxmox, VMs and Longhorn/rook-ceph.</li>
 </ol>
 <h2 id="tripe-node-pve-cluster"><a class="header" href="#tripe-node-pve-cluster">Tripe node PVE Cluster</a></h2>
 <ol>
@@ -942,7 +952,7 @@ systemctl start promtail.service
 <li>In a 3 master/3 worker setup put one master on each PVE node and one worker on each PVE node.</li>
 </ul>
 </li>
-<li>Instead of Longhorn, consider setting up a <ins><a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a></ins> and use <ins><a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a></ins> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
+<li>Instead of Longhorn, consider setting up a <a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a> and use <a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
 </ol>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/proxmox-considerations.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="s3-buckets"><a class="header" href="#s3-buckets">S3 buckets</a></h1>
 <p>Alternatively creating s3 buckets can be automated with Terraform.</p>
@@ -959,7 +969,7 @@ systemctl start promtail.service
 <h3 id="creating-a-bucket"><a class="header" href="#creating-a-bucket">Creating a bucket</a></h3>
 <ol>
 <li>
-<p>Create master <code>key-id</code> and <code>key</code> on <ins><a href="https://secure.backblaze.com/app_keys.htm">Account &gt; App Keys</a></ins></p>
+<p>Create master <code>key-id</code> and <code>key</code> on <a href="https://secure.backblaze.com/app_keys.htm">Account &gt; App Keys</a></p>
 </li>
 <li>
 <p>Export settings</p>
@@ -1132,8 +1142,8 @@ EOF
 <pre><code class="language-sh">mc share download --expire=7d &quot;minio/&lt;bucket-name&gt;/&lt;file&gt;.&lt;ext&gt;&quot; --json  | jq -r .share | pbcopy
 </code></pre>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/s3-buckets.md">Edit this page on GitHub</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="secret-variations-with-flux"><a class="header" href="#secret-variations-with-flux">Secret variations with Flux</a></h1>
-<p>There are several different ways to utilize Kubernetes secrets when using <ins><a href="https://fluxcd.io/">Flux</a></ins> and <ins><a href="https://github.com/mozilla/sops">SOPS</a></ins>, here’s a breakdown of some common methods.</p>
-<p><em>I will not be covering how to integrate SOPS into Flux for that be sure to check out the <ins><a href="https://fluxcd.io/docs/guides/mozilla-sops/">Flux documentation on integrating SOPS</a></ins></em></p>
+<p>There are several different ways to utilize Kubernetes secrets when using <a href="https://fluxcd.io/">Flux</a> and <a href="https://github.com/mozilla/sops">SOPS</a>, here’s a breakdown of some common methods.</p>
+<p><em>I will not be covering how to integrate SOPS into Flux for that be sure to check out the <a href="https://fluxcd.io/docs/guides/mozilla-sops/">Flux documentation on integrating SOPS</a></em></p>
 <h2 id="example-secret"><a class="header" href="#example-secret">Example Secret</a></h2>
 <div id="admonition-info" class="admonition info">
 <div class="admonition-title">
@@ -1166,7 +1176,7 @@ stringData:
 <p><a class="admonition-anchor-link" href="notes/secret-variations-with-flux.html#admonition-example"></a></p>
 </div>
 <div>
-<p>View example <ins><a href="https://ln.devbu.io/ngLju">Helm Release</a></ins> and corresponding <ins><a href="https://ln.devbu.io/ULgnl">Secret</a></ins>.</p>
+<p>View example <a href="https://ln.devbu.io/ngLju">Helm Release</a> and corresponding <a href="https://ln.devbu.io/ULgnl">Secret</a>.</p>
 </div>
 </div>
 <h3 id="method-2-envvaluefrom"><a class="header" href="#method-2-envvaluefrom">Method 2: <code>env.valueFrom</code></a></h3>
@@ -1186,7 +1196,7 @@ stringData:
 <p><a class="admonition-anchor-link" href="notes/secret-variations-with-flux.html#admonition-example-1"></a></p>
 </div>
 <div>
-<p>View example <ins><a href="https://ln.devbu.io/0lbMT">Helm Release</a></ins> and corresponding <ins><a href="https://ln.devbu.io/KYjhP">Secret</a></ins>.</p>
+<p>View example <a href="https://ln.devbu.io/0lbMT">Helm Release</a> and corresponding <a href="https://ln.devbu.io/KYjhP">Secret</a>.</p>
 </div>
 </div>
 <h3 id="method-3-specvaluesfrom"><a class="header" href="#method-3-specvaluesfrom">Method 3: <code>spec.valuesFrom</code></a></h3>
@@ -1209,12 +1219,12 @@ stringData:
 <p><a class="admonition-anchor-link" href="notes/secret-variations-with-flux.html#admonition-example-2"></a></p>
 </div>
 <div>
-<p>View example <ins><a href="https://ln.devbu.io/ARdun">Helm Release</a></ins> and corresponding <ins><a href="https://ln.devbu.io/hNef8">Secret</a></ins>.</p>
+<p>View example <a href="https://ln.devbu.io/ARdun">Helm Release</a> and corresponding <a href="https://ln.devbu.io/hNef8">Secret</a>.</p>
 </div>
 </div>
 <h3 id="method-4-variable-substitution-with-flux"><a class="header" href="#method-4-variable-substitution-with-flux">Method 4: Variable Substitution with Flux</a></h3>
 <blockquote>
-<p><em>Flux variable substitution can inject secrets into any YAML manifest. This requires the <ins><a href="https://fluxcd.io/docs/components/kustomize/kustomization/">Flux Kustomization</a></ins> configured to enable <ins><a href="https://fluxcd.io/docs/components/kustomize/kustomization/#variable-substitution">variable substitution</a></ins>. Correctly configured this allows you to use <code>${GLOBAL_AWESOME_SECRET}</code> in any YAML manifest.</em></p>
+<p><em>Flux variable substitution can inject secrets into any YAML manifest. This requires the <a href="https://fluxcd.io/docs/components/kustomize/kustomization/">Flux Kustomization</a> configured to enable <a href="https://fluxcd.io/docs/components/kustomize/kustomization/#variable-substitution">variable substitution</a>. Correctly configured this allows you to use <code>${GLOBAL_AWESOME_SECRET}</code> in any YAML manifest.</em></p>
 </blockquote>
 <pre><code class="language-yaml">apiVersion: v1
 kind: Secret
@@ -1244,13 +1254,13 @@ spec:
 <p><a class="admonition-anchor-link" href="notes/secret-variations-with-flux.html#admonition-example-3"></a></p>
 </div>
 <div>
-<p>View example <ins><a href="https://ln.devbu.io/ZMbfI">Fluxtomization</a></ins>, <ins><a href="https://ln.devbu.io/y6DJS">Helm Release</a></ins>, and corresponding <ins><a href="https://ln.devbu.io/kRoHj">Secret</a></ins>.</p>
+<p>View example <a href="https://ln.devbu.io/ZMbfI">Fluxtomization</a>, <a href="https://ln.devbu.io/y6DJS">Helm Release</a>, and corresponding <a href="https://ln.devbu.io/kRoHj">Secret</a>.</p>
 </div>
 </div>
 <h2 id="final-thoughts"><a class="header" href="#final-thoughts">Final Thoughts</a></h2>
 <ul>
 <li>
-<p>For the first <strong>three methods</strong> consider using a tool like <ins><a href="https://github.com/stakater/Reloader">stakater/reloader</a></ins> to restart the pod when the secret changes.</p>
+<p>For the first <strong>three methods</strong> consider using a tool like <a href="https://github.com/stakater/Reloader">stakater/reloader</a> to restart the pod when the secret changes.</p>
 </li>
 <li>
 <p>Using reloader on a pod using a secret provided by Flux Variable Substitution will lead to pods being restarted during any change to the secret while related to the pod or not.</p>

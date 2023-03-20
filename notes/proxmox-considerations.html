@@ -166,7 +166,7 @@
 <li>Don't put k8s VMs or Longhorn/rook-ceph on HDDs, only use SSDs or NVMe</li>
 <li>Use k3s with a single master node (4CPU/8GB RAM/50GB disk) that is using sqlite instead of etcd and taint it.</li>
 <li>Use as many worker nodes as you want but start with 3 and add more later on if you need them.</li>
-<li>Consider using <ins><a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a></ins> over Longhorn or rook-ceph if you aren't able physically separate the disks.</li>
+<li>Consider using <a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a> over Longhorn or rook-ceph if you aren't able physically separate the disks.</li>
 </ol>
 <h2 id="dual-node-pve-cluster"><a class="header" href="#dual-node-pve-cluster">Dual node PVE Cluster</a></h2>
 <p>Buy another node for your PVE cluster or refer to Single Node PVE Cluster, <em>however if you must...</em></p>
@@ -178,7 +178,7 @@
 <li>In a 2 master/3 worker setup put one master on each PVE node and try to even out the workers on each PVE node.</li>
 </ul>
 </li>
-<li>Consider using <ins><a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a></ins> for application config data over Longhorn or rook-ceph if you aren't able physically separate the disks between Proxmox, VMs and Longhorn/rook-ceph.</li>
+<li>Consider using <a href="https://github.com/rancher/local-path-provisioner">local-path-provisioner</a> for application config data over Longhorn or rook-ceph if you aren't able physically separate the disks between Proxmox, VMs and Longhorn/rook-ceph.</li>
 </ol>
 <h2 id="tripe-node-pve-cluster"><a class="header" href="#tripe-node-pve-cluster">Tripe node PVE Cluster</a></h2>
 <ol>
@@ -189,7 +189,7 @@
 <li>In a 3 master/3 worker setup put one master on each PVE node and one worker on each PVE node.</li>
 </ul>
 </li>
-<li>Instead of Longhorn, consider setting up a <ins><a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a></ins> and use <ins><a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a></ins> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
+<li>Instead of Longhorn, consider setting up a <a href="https://pve.proxmox.com/wiki/Deploy_Hyper-Converged_Ceph_Cluster">Ceph cluster on your PVE nodes</a> and use <a href="https://rook.io/docs/rook/v1.10/CRDs/Cluster/external-cluster/">Rook to consume it</a> for stateful applications. Due to the way Ceph works in this scenerio, it is fine to use HDDs over SSDs or NVMe here.</li>
 </ol>
 <footer id="open-on-gh"><a href="https://github.com/onedr0p/home-ops/edit/main/docs/src/notes/proxmox-considerations.md">Edit this page on GitHub</a></footer>
                     </main>
