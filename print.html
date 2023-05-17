@@ -266,20 +266,11 @@ GitRepository :: home-ops-kubernetes
 </div>
 <hr />
 <h2 id="-dns"><a class="header" href="#-dns">🌐 DNS</a></h2>
-<details>
-  <summary>Click to see a diagram of how I conquer DNS!</summary>
-<img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/dns.png" align="center" width="600px" alt="dns"/>
-</details>
-<h3 id="ingress-controller"><a class="header" href="#ingress-controller">Ingress Controller</a></h3>
-<p>Over WAN, I have port forwarded ports <code>80</code> and <code>443</code> to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.</p>
-<p><a href="https://www.cloudflare.com/">Cloudflare</a> works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port <code>80</code> and <code>443</code> comes from Cloudflare. In <code>VyOS</code> I block all IPs not originating from the <a href="https://www.cloudflare.com/ips/">Cloudflares list of IP ranges</a>.</p>
 <h3 id="internal-dns"><a class="header" href="#internal-dns">Internal DNS</a></h3>
-<p><a href="https://github.com/coredns/coredns">CoreDNS</a> is deployed on my <code>VyOS</code> router and listening on <code>:53</code>. All DNS queries for <em><strong>my</strong></em> domains are forwarded to <a href="https://github.com/ori-edge/k8s_gateway">k8s_gateway</a> that is running in my cluster. With this setup <code>k8s_gateway</code> has direct access to my clusters ingresses and services and serves DNS for them in my internal network.</p>
-<h3 id="ad-blocking"><a class="header" href="#ad-blocking">Ad Blocking</a></h3>
-<p>The upstream server in CoreDNS is set to NextDNS which provides me with AdBlocking for all devices on my network.</p>
+<p><a href="https://github.com/isc-projects/bind9">Bind9</a> and <a href="https://dnsdist.org/">dnsdist</a> are deployed on Vyos as containers. In my cluster <a href="https://github.com/kubernetes-sigs/external-dns">external-dns</a> is deployed with the RFC2136 provider that populates Bind9 with all my ingresses DNS records.</p>
+<p>dnsdist has some downstream DNS servers configured such as Bind9 (above) and <a href="https://nextdns.io/">NextDNS</a> profiles. All my clients use dnsdist as the upstream DNS server, this allows for more granularity with configuring DNS across my networks. For example giving each of my VLANs a specific NextDNS profile or having all requests for my domain forward to Bind9 on certain networks.</p>
 <h3 id="external-dns"><a class="header" href="#external-dns">External DNS</a></h3>
-<p><a href="https://github.com/kubernetes-sigs/external-dns">external-dns</a> is deployed in my cluster and configure to sync DNS records to <a href="https://www.cloudflare.com/">Cloudflare</a>. The only ingresses <code>external-dns</code> looks at to gather DNS records to put in <code>Cloudflare</code> are ones that have an annotation of <code>external-dns.alpha.kubernetes.io/target</code></p>
-<p>🔸 <em><a href="./provision/kubernetes/cloudflare">Click here</a> to see how else I manage Cloudflare with Terraform.</em></p>
+<p>Another <code>external-dns</code> instance is deployed in my cluster and configure to sync DNS records to <a href="https://www.cloudflare.com/">Cloudflare</a>. The only ingresses this <code>external-dns</code> instance looks at to gather DNS records to put in <code>Cloudflare</code> are ones that have an annotation of <code>external-dns.alpha.kubernetes.io/target</code>.</p>
 <hr />
 <h2 id="-hardware"><a class="header" href="#-hardware">🔧 Hardware</a></h2>
 <details>
