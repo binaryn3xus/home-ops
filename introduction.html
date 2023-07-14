@@ -231,7 +231,7 @@
 <h3 id="cluster-layout"><a class="header" href="#cluster-layout">Cluster layout</a></h3>
 <p>Below is a a high level look at the layout of how my directory structure with Flux works. In this brief example you are able to see that <code>authelia</code> will not be able to run until <code>lldap</code> and  <code>cloudnative-pg</code> are running. It also shows that the <code>Cluster</code> custom resource depends on the <code>cloudnative-pg</code> Helm chart. This is needed because <code>cloudnative-pg</code> installs the <code>Cluster</code> custom resource definition in the Helm chart.</p>
 <pre><code class="language-python"># Key: &lt;kind&gt; :: &lt;metadata.name&gt;
-GitRepository :: home-ops-kubernetes
+GitRepository :: home-kubernetes
     Kustomization :: cluster
         Kustomization :: cluster-apps
             Kustomization :: cluster-apps-cloudnative-pg
