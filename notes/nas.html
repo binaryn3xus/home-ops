@@ -171,7 +171,54 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="nas"><a class="header" href="#nas">NAS</a></h1>
-<p>Outside of using <a href="https://github.com/ansible/ansible">Ansible</a> for configuring the OS, there are some manual steps I did to set up ZFS on Ubuntu.</p>
+<p>My NAS configuation as documentation currently using Ubuntu 22.04</p>
+<h2 id="packages"><a class="header" href="#packages">Packages</a></h2>
+<ol>
+<li>
+<p>Add Fish PPA</p>
+<pre><code class="language-sh">sudo apt-add-repository ppa:fish-shell/release-3
+</code></pre>
+</li>
+<li>
+<p>Install Packages</p>
+<pre><code class="language-sh">sudo apt install -y apt-transport-https ca-certificates containernetworking-plugins curl ffmpeg figlet fish fzf gettext git htop ifenslave iputils-ping net-tools lolcat mailutils msmtp msmtp-mta nano neofetch ntpdate podman psmisc rclone software-properties-common tmux tree uidmap unzip zfs-zed zfsutils-linux dmraid gdisk hdparm lvm2 nfs-common nfs-kernel-server nvme-cli open-iscsi samba samba-vfs-modules smartmontools socat
+</code></pre>
+</li>
+</ol>
+<h2 id="networking"><a class="header" href="#networking">Networking</a></h2>
+<ol>
+<li>
+<p>Add or replace file <code>/etc/netplan/00-installer-config.yaml</code></p>
+<pre><code class="language-yaml">network:
+  version: 2
+  bonds:
+    bond0:
+      interfaces: [eports]
+      mtu: 9000
+      dhcp4: true
+      parameters:
+        mode: 802.3ad
+        lacp-rate: fast
+        transmit-hash-policy: layer2+3
+        mii-monitor-interval: 100
+  ethernets:
+    eports:
+    mtu: 9000
+    match:
+      name: &quot;enp6*&quot;
+    optional: true
+</code></pre>
+</li>
+<li>
+<p>Add or replace file <code>/etc/modules-load.d/modules.conf</code></p>
+<pre><code class="language-text"># /etc/modules: kernel modules to load at boot time.
+#
+# This file contains the names of kernel modules that should be loaded
+# at boot time, one per line. Lines beginning with &quot;#&quot; are ignored.
+bonding
+</code></pre>
+</li>
+</ol>
 <h2 id="zfs"><a class="header" href="#zfs">ZFS</a></h2>
 <h3 id="mirrored-zpool"><a class="header" href="#mirrored-zpool">Mirrored Zpool</a></h3>
 <ol>
@@ -203,7 +250,7 @@ sudo zfs set compression=lz4 eros
 <li>
 <p>Create datasets</p>
 <pre><code class="language-sh">sudo zfs create eros/Apps
-sudo zfs create eros/Apps/MinIO
+sudo zfs create eros/Apps/Frigate
 sudo zfs create eros/Media
 </code></pre>
 </li>
@@ -214,7 +261,7 @@ sudo zfs create eros/Media
     eros/Media
 sudo zfs set \
     sharenfs=&quot;no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24&quot; \
-    eros/Apps/MinIO
+    eros/Apps/Frigate
 </code></pre>
 </li>
 <li>
@@ -225,8 +272,10 @@ sudo chown -R devin:users /eros/Media
 </li>
 </ol>
 <h3 id="snapshots"><a class="header" href="#snapshots">Snapshots</a></h3>
-<p>Install zrepl by following <a href="https://zrepl.github.io/installation/apt-repos.html">these</a> instructions.</p>
 <ol>
+<li>
+<p>Install zrepl by following <a href="https://zrepl.github.io/installation/apt-repos.html">these</a> instructions.</p>
+</li>
 <li>
 <p>Add or replace the file <code>/etc/zrepl/zrepl.yml</code></p>
 <pre><code class="language-yaml">global:
@@ -268,6 +317,20 @@ jobs:
 </li>
 </ol>
 <h2 id="nfs"><a class="header" href="#nfs">NFS</a></h2>
+<h3 id="force-nfs-4-and-update-threads"><a class="header" href="#force-nfs-4-and-update-threads">Force NFS 4 and update threads</a></h3>
+<ol>
+<li>
+<p>Add or replace file <code>/etc/nfs.conf.d/local.conf</code></p>
+<pre><code class="language-text">[nfsd]
+vers2 = n
+vers3 = n
+threads = 16
+
+[mountd]
+manage-gids = 1
+</code></pre>
+</li>
+</ol>
 <h3 id="non-zfs-nfs-shares"><a class="header" href="#non-zfs-nfs-shares">Non ZFS NFS Shares</a></h3>
 <ol>
 <li>
@@ -297,7 +360,8 @@ sudo chown -R devin:users /share/PVCs
 </li>
 <li>
 <p>Create ZFS datasets and update permissions</p>
-<pre><code class="language-sh">sudo zfs create eros/TimeMachine/devin
+<pre><code class="language-sh">sudo zfs create eros/TimeMachine
+sudo zfs create eros/TimeMachine/devin
 sudo zfs create eros/TimeMachine/louie
 sudo chown -R devin:users /eros/TimeMachine
 sudo chmod -R 770 /eros/TimeMachine
@@ -309,9 +373,8 @@ sudo chmod -R 770 /eros/TimeMachine
 </code></pre>
 </li>
 <li>
-<p>Update samba config</p>
-<pre><code class="language-txt"># /etc/samba/smb.conf
-[global]
+<p>Add or replace file <code>/etc/samba/smb.conf</code></p>
+<pre><code class="language-text">[global]
 min protocol = SMB2
 ea support = yes
 vfs objects = fruit streams_xattr
@@ -356,7 +419,7 @@ short preserve case = no
 </li>
 <li>
 <p>Restart samba</p>
-<pre><code class="language-sh">sudo systemctl status smbd.service
+<pre><code class="language-sh">sudo systemctl restart smbd.service
 </code></pre>
 </li>
 <li>
@@ -365,6 +428,130 @@ short preserve case = no
 </code></pre>
 </li>
 </ol>
+<h2 id="system"><a class="header" href="#system">System</a></h2>
+<ol>
+<li>
+<p>Disable apparmor</p>
+<pre><code class="language-sh">sudo systemctl stop apparmor
+sudo systemctl mask apparmor
+</code></pre>
+</li>
+<li>
+<p>Disable mitigations and apparmor in grub</p>
+<pre><code class="language-sh">sudo nano /etc/default/grub
+# GRUB_CMDLINE_LINUX=&quot;apparmor=0 mitigations=off&quot;
+sudo update-grub
+sudo reboot
+</code></pre>
+</li>
+<li>
+<p>Disable swap</p>
+<pre><code class="language-sh">sudo swapoff -a
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
+</code></pre>
+</li>
+</ol>
+<h2 id="notifications"><a class="header" href="#notifications">Notifications</a></h2>
+<ol>
+<li>Add or replace file <code>/etc/aliases</code></li>
+</ol>
+<div id="admonition-info" class="admonition info">
+<div class="admonition-title">
+<p>Info</p>
+<p><a class="admonition-anchor-link" href="#admonition-info"></a></p>
+</div>
+<div>
+<pre><code>Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
+</code></pre>
+</div>
+</div>
+<pre><code>```text
+mailer-daemon: postmaster@
+postmaster: root@
+nobody: root@
+hostmaster: root@
+usenet: root@
+news: root@
+webmaster: root@
+www: root@
+ftp: root@
+abuse: root@
+noc: root@
+security: root@
+root: expanse@buhl.casa
+```
+</code></pre>
+<ol start="2">
+<li>Add or replace file <code>/etc/msmtprc</code></li>
+</ol>
+<div id="admonition-info-1" class="admonition info">
+<div class="admonition-title">
+<p>Info</p>
+<p><a class="admonition-anchor-link" href="#admonition-info-1"></a></p>
+</div>
+<div>
+<pre><code>Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
+</code></pre>
+</div>
+</div>
+<pre><code>```text
+defaults
+auth off
+tls  off
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+logfile /var/log/msmtp
+
+account        maddy
+host           smtp-relay.turbo.ac
+port           25
+from           expanse@buhl.casa
+tls_starttls   off
+
+account default: maddy
+
+aliases /etc/aliases
+```
+</code></pre>
+<ol start="3">
+<li>Add or replace file <code>/etc/smartd.conf</code></li>
+</ol>
+<div id="admonition-info-2" class="admonition info">
+<div class="admonition-title">
+<p>Info</p>
+<p><a class="admonition-anchor-link" href="#admonition-info-2"></a></p>
+</div>
+<div>
+<pre><code>Restart smartd after changing: `sudo systemctl restart smartd.service`
+</code></pre>
+</div>
+</div>
+<pre><code>```text
+DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40 -m devin+alerts@buhl.casa
+```
+</code></pre>
+<ol start="4">
+<li>Add or replace file <code>/etc/zfs/zed.d/zed.rc</code></li>
+</ol>
+<div id="admonition-info-3" class="admonition info">
+<div class="admonition-title">
+<p>Info</p>
+<p><a class="admonition-anchor-link" href="#admonition-info-3"></a></p>
+</div>
+<div>
+<pre><code>Restart zed after changing: `sudo systemctl restart zed.service`
+</code></pre>
+</div>
+</div>
+<pre><code>```text
+ZED_DEBUG_LOG=&quot;/var/log/zed.debug.log&quot;
+ZED_EMAIL_ADDR=&quot;expanse@buhl.casa&quot;
+ZED_EMAIL_PROG=&quot;mail&quot;
+ZED_EMAIL_OPTS=&quot;-s '@SUBJECT@' @ADDRESS@ -r devin+alerts@buhl.casa&quot;
+ZED_NOTIFY_VERBOSE=1
+ZED_NOTIFY_DATA=1
+ZED_USE_ENCLOSURE_LEDS=1
+```
+</code></pre>
 <h2 id="misc"><a class="header" href="#misc">Misc</a></h2>
 <h3 id="badblocks"><a class="header" href="#badblocks">Badblocks</a></h3>
 <div id="admonition-warning" class="admonition warning">
