@@ -476,7 +476,7 @@ ftp: root@
 abuse: root@
 noc: root@
 security: root@
-root: expanse@buhl.casa
+root: devin@buhl.casa
 </code></pre>
 </li>
 </ol>
@@ -501,7 +501,7 @@ logfile /var/log/msmtp
 account        maddy
 host           smtp-relay.turbo.ac
 port           25
-from           expanse@buhl.casa
+from           devin@buhl.casa
 tls_starttls   off
 
 account default: maddy
@@ -539,7 +539,7 @@ aliases /etc/aliases
 <li>
 <p>Add or replace file <code>/etc/zfs/zed.d/zed.rc</code></p>
 <pre><code class="language-text">ZED_DEBUG_LOG=&quot;/var/log/zed.debug.log&quot;
-ZED_EMAIL_ADDR=&quot;expanse@buhl.casa&quot;
+ZED_EMAIL_ADDR=&quot;devin@buhl.casa&quot;
 ZED_EMAIL_PROG=&quot;mail&quot;
 ZED_EMAIL_OPTS=&quot;-s '@SUBJECT@' @ADDRESS@ -r devin+alerts@buhl.casa&quot;
 ZED_NOTIFY_VERBOSE=1
