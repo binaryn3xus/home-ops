@@ -603,21 +603,19 @@ sudo sed -i '/ swap / s/^/#/' /etc/fstab
 </li>
 </ol>
 <h2 id="notifications"><a class="header" href="#notifications">Notifications</a></h2>
-<ol>
-<li>Add or replace file <code>/etc/aliases</code></li>
-</ol>
 <div id="admonition-info" class="admonition info">
 <div class="admonition-title">
 <p>Info</p>
 <p><a class="admonition-anchor-link" href="notes/nas.html#admonition-info"></a></p>
 </div>
 <div>
-<pre><code>Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
-</code></pre>
+<p>Restart msmtpd after changing: <code>sudo systemctl restart msmtpd.service</code></p>
 </div>
 </div>
-<pre><code>```text
-mailer-daemon: postmaster@
+<ol>
+<li>
+<p>Add or replace file <code>/etc/aliases</code></p>
+<pre><code class="language-text">mailer-daemon: postmaster@
 postmaster: root@
 nobody: root@
 hostmaster: root@
@@ -630,10 +628,8 @@ abuse: root@
 noc: root@
 security: root@
 root: expanse@buhl.casa
-```
 </code></pre>
-<ol start="2">
-<li>Add or replace file <code>/etc/msmtprc</code></li>
+</li>
 </ol>
 <div id="admonition-info-1" class="admonition info">
 <div class="admonition-title">
@@ -641,12 +637,13 @@ root: expanse@buhl.casa
 <p><a class="admonition-anchor-link" href="notes/nas.html#admonition-info-1"></a></p>
 </div>
 <div>
-<pre><code>Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
-</code></pre>
+<p>Restart msmtpd after changing: <code>sudo systemctl restart msmtpd.service</code></p>
 </div>
 </div>
-<pre><code>```text
-defaults
+<ol start="2">
+<li>
+<p>Add or replace file <code>/etc/msmtprc</code></p>
+<pre><code class="language-text">defaults
 auth off
 tls  off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
@@ -661,10 +658,8 @@ tls_starttls   off
 account default: maddy
 
 aliases /etc/aliases
-```
 </code></pre>
-<ol start="3">
-<li>Add or replace file <code>/etc/smartd.conf</code></li>
+</li>
 </ol>
 <div id="admonition-info-2" class="admonition info">
 <div class="admonition-title">
@@ -672,16 +667,15 @@ aliases /etc/aliases
 <p><a class="admonition-anchor-link" href="notes/nas.html#admonition-info-2"></a></p>
 </div>
 <div>
-<pre><code>Restart smartd after changing: `sudo systemctl restart smartd.service`
-</code></pre>
+<p>Restart smartd after changing: <code>sudo systemctl restart smartd.service</code></p>
 </div>
 </div>
-<pre><code>```text
-DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40 -m devin+alerts@buhl.casa
-```
+<ol start="3">
+<li>
+<p>Add or replace file <code>/etc/smartd.conf</code></p>
+<pre><code class="language-text">DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40 -m devin+alerts@buhl.casa
 </code></pre>
-<ol start="4">
-<li>Add or replace file <code>/etc/zfs/zed.d/zed.rc</code></li>
+</li>
 </ol>
 <div id="admonition-info-3" class="admonition info">
 <div class="admonition-title">
@@ -689,20 +683,22 @@ DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
 <p><a class="admonition-anchor-link" href="notes/nas.html#admonition-info-3"></a></p>
 </div>
 <div>
-<pre><code>Restart zed after changing: `sudo systemctl restart zed.service`
-</code></pre>
+<p>Restart zed after changing: <code>sudo systemctl restart zed.service</code></p>
 </div>
 </div>
-<pre><code>```text
-ZED_DEBUG_LOG=&quot;/var/log/zed.debug.log&quot;
+<ol start="4">
+<li>
+<p>Add or replace file <code>/etc/zfs/zed.d/zed.rc</code></p>
+<pre><code class="language-text">ZED_DEBUG_LOG=&quot;/var/log/zed.debug.log&quot;
 ZED_EMAIL_ADDR=&quot;expanse@buhl.casa&quot;
 ZED_EMAIL_PROG=&quot;mail&quot;
 ZED_EMAIL_OPTS=&quot;-s '@SUBJECT@' @ADDRESS@ -r devin+alerts@buhl.casa&quot;
 ZED_NOTIFY_VERBOSE=1
 ZED_NOTIFY_DATA=1
 ZED_USE_ENCLOSURE_LEDS=1
-```
 </code></pre>
+</li>
+</ol>
 <h2 id="misc"><a class="header" href="#misc">Misc</a></h2>
 <h3 id="badblocks"><a class="header" href="#badblocks">Badblocks</a></h3>
 <div id="admonition-warning" class="admonition warning">
