@@ -439,6 +439,83 @@ sudo chown -R devin:users /share/PVCs
 </code></pre>
 </li>
 </ol>
+<h2 id="time-machine"><a class="header" href="#time-machine">Time Machine</a></h2>
+<ol>
+<li>
+<p>Install required tools</p>
+<pre><code class="language-sh">sudo apt install samba samba-vfs-modules
+</code></pre>
+</li>
+<li>
+<p>Create ZFS datasets and update permissions</p>
+<pre><code class="language-sh">sudo zfs create eros/TimeMachine/devin
+sudo zfs create eros/TimeMachine/louie
+sudo chown -R devin:users /eros/TimeMachine
+sudo chmod -R 770 /eros/TimeMachine
+</code></pre>
+</li>
+<li>
+<p>Set a smb password for user</p>
+<pre><code class="language-sh">sudo smbpasswd -a devin
+</code></pre>
+</li>
+<li>
+<p>Update samba config</p>
+<pre><code class="language-txt"># /etc/samba/smb.conf
+[global]
+min protocol = SMB2
+ea support = yes
+vfs objects = fruit streams_xattr
+fruit:aapl = yes
+fruit:metadata = stream
+fruit:model = MacSamba
+fruit:posix_rename = yes
+fruit:veto_appledouble = no
+fruit:nfs_aces = no
+fruit:wipe_intentionally_left_blank_rfork = yes
+fruit:delete_empty_adfiles = yes
+spotlight = no
+
+[devin]
+comment = Devin's Time Machine
+fruit:time machine = yes
+fruit:time machine max size = 1050G
+path = /eros/TimeMachine/devin
+browseable = yes
+write list = devin
+create mask = 0600
+directory mask = 0700
+case sensitive = true
+default case = lower
+preserve case = no
+short preserve case = no
+
+[louie]
+comment = Louie's Time Machine
+fruit:time machine = yes
+fruit:time machine max size = 1050G
+path = /eros/TimeMachine/louie
+browseable = yes
+write list = devin
+create mask = 0600
+directory mask = 0700
+case sensitive = true
+default case = lower
+preserve case = no
+short preserve case = no
+</code></pre>
+</li>
+<li>
+<p>Restart samba</p>
+<pre><code class="language-sh">sudo systemctl status smbd.service
+</code></pre>
+</li>
+<li>
+<p>Set up Time Machine on MacOS</p>
+<pre><code class="language-sh">sudo tmutil setdestination -a smb://devin:${smbpasswd}@expanse.turbo.ac/devin
+</code></pre>
+</li>
+</ol>
 <h2 id="misc"><a class="header" href="#misc">Misc</a></h2>
 <h3 id="badblocks"><a class="header" href="#badblocks">Badblocks</a></h3>
 <div id="admonition-warning" class="admonition warning">
