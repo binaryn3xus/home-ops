@@ -855,6 +855,14 @@ http {
 </li>
 </ol>
 <h2 id="monitoring"><a class="header" href="#monitoring">Monitoring</a></h2>
+<h3 id="disable-auth-on-prometheus-exporter"><a class="header" href="#disable-auth-on-prometheus-exporter">Disable auth on prometheus exporter</a></h3>
+<pre><code class="language-sh">rw
+nano /usr/lib/python3.11/site-packages/kvmd/apps/kvmd/api/export.py
+# Add the False arg on the exposed_http decorator...
+# @exposed_http(&quot;GET&quot;, &quot;/export/prometheus/metrics&quot;, False)
+ro
+systemctl restart kvmd.service
+</code></pre>
 <h3 id="install-node-exporter"><a class="header" href="#install-node-exporter">Install node-exporter</a></h3>
 <pre><code class="language-sh">pacman -S prometheus-node-exporter
 systemctl enable --now prometheus-node-exporter
