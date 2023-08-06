@@ -203,7 +203,7 @@
 <h2 id="-kubernetes"><a class="header" href="#-kubernetes">⛵ Kubernetes</a></h2>
 <p>There is a template over at <a href="https://github.com/onedr0p/flux-cluster-template">onedr0p/flux-cluster-template</a> if you wanted to try and follow along with some of the practices I use here.</p>
 <h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
-<p>My cluster is <a href="https://k3s.io/">k3s</a> provisioned overtop bare-metal Ubuntu Server using the <a href="https://www.ansible.com/">Ansible</a> galaxy role <a href="https://github.com/PyratLabs/ansible-role-k3s">ansible-role-k3s</a>. This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.</p>
+<p>My cluster is <a href="https://k3s.io/">k3s</a> provisioned overtop bare-metal Debian using the <a href="https://www.ansible.com/">Ansible</a> galaxy role <a href="https://github.com/PyratLabs/ansible-role-k3s">ansible-role-k3s</a>. This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.</p>
 <p>🔸 <em><a href="./ansible/">Click here</a> to see my Ansible playbooks and roles.</em></p>
 <h3 id="core-components"><a class="header" href="#core-components">Core Components</a></h3>
 <ul>
@@ -282,11 +282,11 @@ GitRepository :: home-kubernetes
 </div>
 <hr />
 <h2 id="-dns"><a class="header" href="#-dns">🌐 DNS</a></h2>
-<h3 id="internal-dns"><a class="header" href="#internal-dns">Internal DNS</a></h3>
-<p><a href="https://github.com/isc-projects/bind9">Bind9</a> and <a href="https://dnsdist.org/">dnsdist</a> are deployed on Vyos as containers. In my cluster <a href="https://github.com/kubernetes-sigs/external-dns">external-dns</a> is deployed with the RFC2136 provider that populates Bind9 with all my ingresses DNS records.</p>
-<p>dnsdist has some downstream DNS servers configured such as Bind9 (above) and <a href="https://nextdns.io/">NextDNS</a> profiles. All my clients use dnsdist as the upstream DNS server, this allows for more granularity with configuring DNS across my networks. These could be things like giving each of my VLANs a specific NextDNS profile, or having all requests for my domain forward to Bind9 on certain networks, or only using 1.1.1.1 instead of NextDNS on certain networks where adblocking isn't needed.</p>
-<h3 id="external-dns"><a class="header" href="#external-dns">External DNS</a></h3>
-<p>Another <code>external-dns</code> instance is deployed in my cluster and configure to sync DNS records to <a href="https://www.cloudflare.com/">Cloudflare</a>. The only ingresses this <code>external-dns</code> instance looks at to gather DNS records to put in <code>Cloudflare</code> are ones that have an annotation of <code>external-dns.alpha.kubernetes.io/target</code>.</p>
+<h3 id="home-dns"><a class="header" href="#home-dns">Home DNS</a></h3>
+<p>On my Vyos router I have <a href="https://github.com/isc-projects/bind9">Bind9</a> and <a href="https://dnsdist.org/">dnsdist</a> deployed as containers. In my cluster <code>external-dns</code> is deployed with the <code>RFC2136</code> provider which syncs DNS records to <code>bind9</code>.</p>
+<p>Downstream DNS servers configured in <code>dnsdist</code> such as <code>bind9</code> (above) and <a href="https://nextdns.io/">NextDNS</a>. All my clients use <code>dnsdist</code> as the upstream DNS server, this allows for more granularity with configuring DNS across my networks. These could be things like giving each of my VLANs a specific <code>nextdns</code> profile, or having all requests for my domain forward to <code>bind9</code> on certain networks, or only using <code>1.1.1.1</code> instead of <code>nextdns</code> on certain networks where adblocking isn't needed.</p>
+<h3 id="public-dns"><a class="header" href="#public-dns">Public DNS</a></h3>
+<p>Outside the <code>external-dns</code> instance mentioned above another instance is deployed in my cluster and configure to sync DNS records to <a href="https://www.cloudflare.com/">Cloudflare</a>. The only ingresses this <code>external-dns</code> instance looks at to gather DNS records to put in <code>Cloudflare</code> are ones that have an ingress class name of <code>external</code> and an ingress annotation of <code>external-dns.alpha.kubernetes.io/target</code>.</p>
 <hr />
 <h2 id="-hardware"><a class="header" href="#-hardware">🔧 Hardware</a></h2>
 <details>
