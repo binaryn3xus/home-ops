@@ -234,7 +234,7 @@ sudo zfs set compression=lz4 eros
 <li>
 <p>Attach more mirrors</p>
 <pre><code class="language-sh">sudo zpool add eros mirror \
-    /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0B3D2 \
+    /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH \
     /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_X1G3B01L
 </code></pre>
 </li>
@@ -549,6 +549,22 @@ ZED_USE_ENCLOSURE_LEDS=1
 </li>
 </ol>
 <h2 id="misc"><a class="header" href="#misc">Misc</a></h2>
+<h3 id="replace-a-drive"><a class="header" href="#replace-a-drive">Replace a Drive</a></h3>
+<div id="admonition-info-4" class="admonition info">
+<div class="admonition-title">
+<p>Info</p>
+<p><a class="admonition-anchor-link" href="#admonition-info-4"></a></p>
+</div>
+<div>
+<p>Enable autoexpand on the pool with <code>sudo zpool set autoexpand=on eros</code></p>
+</div>
+</div>
+<pre><code class="language-sh">sudo zpool offline eros /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH
+sudo zpool replace eros /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH /dev/disk/by-id/scsi-SATA_ST22000NM001E-3H_ZX201HJC
+</code></pre>
+<p>When resilvering is complete detach the drive...</p>
+<pre><code class="language-sh">sudo zpool detach eros /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH
+</code></pre>
 <h3 id="badblocks"><a class="header" href="#badblocks">Badblocks</a></h3>
 <div id="admonition-warning" class="admonition warning">
 <div class="admonition-title">
@@ -556,10 +572,22 @@ ZED_USE_ENCLOSURE_LEDS=1
 <p><a class="admonition-anchor-link" href="#admonition-warning"></a></p>
 </div>
 <div>
-<p>This command is <strong>very destructive</strong> and should only be used to check for bad sectors</p>
+<p>This command is <strong>very destructive</strong> and should only be used to check for bad sectors, this also take ashile so be sure to start it in a <code>screen</code></p>
 </div>
 </div>
 <pre><code class="language-sh">sudo badblocks -b 4096 -wsv /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
+</code></pre>
+<h3 id="shred"><a class="header" href="#shred">Shred</a></h3>
+<div id="admonition-warning-1" class="admonition warning">
+<div class="admonition-title">
+<p>Warning</p>
+<p><a class="admonition-anchor-link" href="#admonition-warning-1"></a></p>
+</div>
+<div>
+<p>This command is <strong>very destructive</strong> and should only be used to completely wipe the drive, this also take ashile so be sure to start it in a <code>screen</code></p>
+</div>
+</div>
+<pre><code class="language-sh">sudo shred -vfz -n 4 /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
 </code></pre>
 <h3 id="lenovo-sa120"><a class="header" href="#lenovo-sa120">Lenovo SA120</a></h3>
 <p>Due to the loudness of the fans, they can be adjusted by using <a href="https://github.com/AndrewX192/lenovo-sa120-fanspeed-utility.git">AndrewX192/lenovo-sa120-fanspeed-utility</a>.</p>
